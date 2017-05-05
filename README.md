@@ -88,7 +88,7 @@ The **prep** command is one of the key components of this addon's function. This
     //ct prep sam dust acc/atk
     //ct prep nin dust racc/ratk
     //ct prep drg dust macc/mdmg
-    //ct prep smn eva/meva
+    //ct prep smn dust eva/meva
 
     //ct prep blu sap wsd
     //ct prep cor sap critrate
