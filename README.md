@@ -2,7 +2,7 @@
 Cape Trader is used to automate the process of augmenting ambuscade capes. The cape trader addon injects packets extensively so please take that into consideration and use this addon at you own risk. While there are some safeguards in this addon, there is still a risk that you can lose your abdhaljs thread,dust,sap and dye if you use this addon. Please read the usage notes and information on the prep and go commands carefully as well as the warnings section before deciding to use this addon.
 
 ___
-#### Usage notes
+### Usage notes
 
 Load the addon by using the following command:
 
@@ -45,7 +45,7 @@ Suppose you want to augment an ogma's cape from scratch with dex, accuracy and a
 
 ___
 
-#### Commands
+### Commands
 
 The **help** command displays all of the possible commands of CapeTrader in your chat windower. Below are the equivalent ways of calling the command:
 
@@ -139,7 +139,7 @@ The **list** command is used as a reminder of what are valid inputs for the augm
 ___
 
 
-#### Warnings and notes on the relevant packets
+### Warnings and notes on the relevant packets
 There are four parts to the process of augmenting your ambuscade cape:
 
 1. Part 1: Targetting gorpa-masorpa plus putting together and trading the relevant items. This takes me about 10 seconds to complete manually. (Involves outgoing packet 0x036)
