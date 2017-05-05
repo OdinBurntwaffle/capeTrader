@@ -47,6 +47,7 @@ abdhaljs = require('allAugPaths')
 augItems = require('allAugItems')
 maxAugMap = require('maxAugMap')
 extData = require('extdata')
+jobToCapeMap = require('jobToCapeMap')
 
 local pkt = {}
 
@@ -83,8 +84,8 @@ windower.register_event('addon command', function(...)
 	local cmd = string.lower(args[1])
 	args:remove(1)
 	if cmd == 'prep' then
-		if args[1] and args[2] and args[3] and args[4] then
-			prepareCapeForAugments(args[1],args[2] .. ' ' .. args[3],args[4])
+		if args[1] and args[2] and args[3] then
+			prepareCapeForAugments(args[2],args[1],args[3])
 		else
 			windower.add_to_chat(123,"You are missing at least one input to the prep command.")
 		end
@@ -291,12 +292,12 @@ function checkCapeCount()
 			return true
 		end
 	else
-		windower.add_to_chat(123,'You have not yet specified a cape to augment, please use the //ct prep command first.')
+		-- windower.add_to_chat(123,'You have not yet specified a cape to augment, please use the //ct prep command first.')
 		return false
 	end
 end
 
-function prepareCapeForAugments(augItemType,capeType,augPath)
+function prepareCapeForAugments(augItemType,jobName,augPath)
 	if not busy then
 		local validArguments = true
 		local augItemTypeIsValid = false
@@ -311,18 +312,20 @@ function prepareCapeForAugments(augItemType,capeType,augPath)
 		end
 
 		local isCapeTypeValid = false
-		for index,cape in pairs(ambuscadeCapeTable) do
-			if string.lower(cape.en) == string.lower(capeType) then
-				isCapeTypeValid = true
-				break
+		if jobToCapeMap[jobName] then
+			for index,cape in pairs(ambuscadeCapeTable) do
+				if string.lower(cape.en) == string.lower(jobToCapeMap[jobName]) then
+					isCapeTypeValid = true
+					break
+				end
 			end
 		end
 
 		if not isCapeTypeValid then
-			windower.add_to_chat(123,'The cape name you entered is not valid, please check for typos and a cape list for spelling. You entered: ' .. capeType)
+			windower.add_to_chat(123,'The job name you entered is not valid. You entered: ' .. jobName)
 			validArguments = false
 		else
-			cape_name = '' .. capeType .. ''
+			cape_name = '' .. jobToCapeMap[jobName] .. ''
 		end
 
 		if augPath and augItemTypeIsValid then
@@ -347,7 +350,7 @@ function prepareCapeForAugments(augItemType,capeType,augPath)
 			safeToAugment = true
 			firstPass = true
 			timesAugmentedCount = 1
-			windower.add_to_chat(158,'You can now augment your ' .. string.lower(capeType) .. ' with ' .. string.lower(augPath) .. ' using abdhaljs ' .. string.lower(augItemType) .. '.')
+			windower.add_to_chat(158,'You can now augment your ' .. jobToCapeMap[jobName] .. ' with ' .. string.lower(augPath) .. ' using abdhaljs ' .. string.lower(augItemType) .. '.')
 		else
 			maxAugKey = nil
 			safeToAugment = false
@@ -364,11 +367,12 @@ end
 
 function startAugmentingCape(numberOfRepeats,firstAttempt)
 	local augStatus
-	if safeToAugment then
+	local capeCountsafe = checkCapeCount()
+	if safeToAugment and capeCountsafe then
 		augStatus = checkAugLimits()
 	end
 	if safeToAugment and not busy and firstAttempt and augStatus then
-		if checkCapeCount() and checkThreadDustDyeSapCount(string.lower(path_item),numberOfRepeats) and checkDistanceToNPC()  and string.lower(augStatus) ~= 'maxed' then
+		if capeCountsafe and checkThreadDustDyeSapCount(string.lower(path_item),numberOfRepeats) and checkDistanceToNPC()  and string.lower(augStatus) ~= 'maxed' then
 			if firstPass then
 				if string.lower(augStatus) ~= 'empty' then
 					firstTimeAug = false
@@ -413,7 +417,7 @@ function startAugmentingCape(numberOfRepeats,firstAttempt)
 		end
 	elseif busy then
 		windower.add_to_chat(123,'You are currently still augmenting a cape, please wait until the process finishes.')
-	else
+	elseif not safeToAugment then
 		windower.add_to_chat(123,'You have not yet setup your cape and augment information with the //ct prep command!')
 	end
 end
@@ -544,7 +548,7 @@ function printHelp()
 	windower.add_to_chat(466,string.format('%s Version: %s Command Listing:', _addon.name, _addon.version))
    windower.add_to_chat(466,'   reload|r Reload CapeTrader.')
    windower.add_to_chat(466,'   unload|u Unload CapeTrader.')
-   windower.add_to_chat(466,'   prep <augItem> <cape> <augPath> Prepares a given cape with augItem on augPath. Need to use this before using //ct go.')
+   windower.add_to_chat(466,'   prep <jobName> <augItem> <augPath> Prepares a given job\'s cape with augItem on augPath. Need to use this before using //ct go.')
    windower.add_to_chat(466,'   go <#repeats> Starts augmenting cape with the info gathered from the prep command. The repeats input defaults to one if not provided.')
    windower.add_to_chat(466,'   list|l Lists all possible augitems and their valid paths. Use to know what the valid inputs for //ct prep are.')
 end

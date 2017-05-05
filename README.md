@@ -19,28 +19,28 @@ There are some conditions that you need to meet in order to use the important go
 
 3. Make sure there is only one of the given cape you want to augment in your inventory. For example if you are intending to augment an ogma's cape, there should only be one ogma's cape in your inventory.
 
-4. The go command takes a number as an input that represents the number of times you wish to augment your cape. It is possible you will lose your thread,dust,sap and dye if you enter a number that would take your augment past its possible maximum. For example suppose you have an ogma's cape already augmented with Dex+5 from a thread item. After using the **//ct prep thread ogma's cape dex** command you enter **//ct go 20** command. There is a safeguard that will stop the augmentation process after augmenting your cape 15 times. **However, there is NO guarantee this safeguard will work for every possible augment path. Particularly pet related paths that I have not yet been able to test.** It is highly recommended that you enter the exact number of times you need to max a particular path to decrease the chance of lost items.
+4. The go command takes a number as an input that represents the number of times you wish to augment your cape. It is possible you will lose your thread,dust,sap and dye if you enter a number that would take your augment past its possible maximum. For example suppose you have an ogma's cape already augmented with Dex+5 from a thread item. After using the **//ct prep run thread dex** command you enter **//ct go 20** command. There is a safeguard that will stop the augmentation process after augmenting your cape 15 times. **However, there is NO guarantee this safeguard will work for every possible augment path. Particularly pet related paths that I have not yet been able to test.** It is highly recommended that you enter the exact number of times you need to max a particular path to decrease the chance of lost items.
 
-5. It is also possible to lose augment items if you try to augment a cape with a different path than is already present. Suppose again you have an ogma's cape augmented with DEX+5 via threads. If you enter the **//ct prep thread ogma's cape str** and then the **//ct go 15** command intending to augment your cape with str, **you will lose all 15 threads**. There is currently no safeguard for this but one is currently being considered to be added to the capetrader addon.
+5. It is also possible to lose augment items if you try to augment a cape with a different path than is already present. Suppose again you have an ogma's cape augmented with DEX+5 via threads. If you enter the **//ct prep run thread str** and then the **//ct go 15** command intending to augment your cape with str, **you will lose all 15 threads**. There is currently no safeguard for this but one is currently being considered to be added to the capetrader addon.
 
 6. If you have the inventory menu open, be sure to close before using the go commmand and make sure you do not open menus or move items around in your inventories while the augmentation process is ongoing. You will get a start message after you use the go command and an ending message once the augmentation process completes. You can mess around with your inventory after you get the ending message, otherwise you will interupt the augmentation process.
 
 
 Suppose you want to augment an ogma's cape from scratch with dex, accuracy and attack, and double attack. You can use the following steps:
 
-1.	Enter //ct prep thread ogma's cape dex
+1.	Enter //ct prep run thread dex
 
 2.	Enter //ct go 20
 
 3. Wait for the ending message
 
-4. Enter //ct prep dust ogma's cape acc/atk
+4. Enter //ct prep run dust acc/atk
 
 5. Enter //ct go 20
 
 6.	Wait for the ending message.
 
-7. Enter //ct prep sap ogma's cape doubleattack
+7. Enter //ct prep run sap doubleattack
 
 8.	Enter //ct go 10
 
@@ -71,62 +71,62 @@ The **unload** command reloads the addon. Useful if you ever the addon ever gett
     //capetrader unload
     //capetrader u
 
-The **prep** command is one of the key components of this addon's function. This command tells the go command how to augment your cape. There are three inputs to the prep command. First is the type of augment item: thread, dust, sap and dye. Second is the name of the cape, for example: camulus's mantle. Third is the augment path. Note that none of these inputs are case sensitive. Also in case you are not sure exactly what to input for the augment path input, you can use the list command or use the following list for reference. Below are all of the possible ways to prepare a camulus's mantle:
+The **prep** command is one of the key components of this addon's function. This command tells the go command how to augment your cape. There are three inputs to the prep command. First is the 3 letter abbreviation of the job on the cape, for example: cor blm whm pup. The second is the type of augment item you need to use: thread, dust, sap and dye.  Third is the augment path. Note that none of these inputs are case sensitive. Also in case you are not sure exactly what to input for the augment path input, you can use the list command or use the following list for reference. Below are all of the possible ways to prepare all of the different ambuscade capes:
 
-    //ct prep thread camulus's mantle hp
-    //ct prep thread camulus's mantle mp
-    //ct prep thread camulus's mantle str
-    //ct prep thread camulus's mantle dex
-    //ct prep thread camulus's mantle vit
-    //ct prep thread camulus's mantle agi
-    //ct prep thread camulus's mantle int
-    //ct prep thread camulus's mantle mnd
-    //ct prep thread camulus's mantle chr
-    //ct prep thread camulus's mantle petmelee
-    //ct prep thread camulus's mantle petmagic
+    //ct prep war thread hp
+    //ct prep mnk thread mp
+    //ct prep whm thread str
+    //ct prep blm thread dex
+    //ct prep rdm thread vit
+    //ct prep thf thread agi
+    //ct prep pld thread int
+    //ct prep drk thread mnd
+    //ct prep bst thread chr
+    //ct prep brd thread petmelee
+    //ct prep rng thread petmagic
 
-    //ct prep dust camulus's mantle acc/atk
-    //ct prep dust camulus's mantle racc/ratk
-    //ct prep dust camulus's mantle macc/mdmg
-    //ct prep dust camulus's mantle eva/meva
+    //ct prep sam dust acc/atk
+    //ct prep nin dust racc/ratk
+    //ct prep drg dust macc/mdmg
+    //ct prep smn eva/meva
 
-    //ct prep sap camulus's mantle wsd
-    //ct prep sap camulus's mantle critrate
-    //ct prep sap camulus's mantle stp
-    //ct prep sap camulus's mantle doubleattack
-    //ct prep sap camulus's mantle haste
-    //ct prep sap camulus's mantle dw
-    //ct prep sap camulus's mantle enmity+
-    //ct prep sap camulus's mantle enmity-
-    //ct prep sap camulus's mantle snapshot
-    //ct prep sap camulus's mantle mab
-    //ct prep sap camulus's mantle fc
-    //ct prep sap camulus's mantle curepotency
-    //ct prep sap camulus's mantle waltzpotency
-    //ct prep sap camulus's mantle petregen
-    //ct prep sap camulus's mantle pethaste
+    //ct prep blu sap wsd
+    //ct prep cor sap critrate
+    //ct prep pup sap stp
+    //ct prep dnc sap doubleattack
+    //ct prep sch sap haste
+    //ct prep geo sap dw
+    //ct prep run sap enmity+
+    //ct prep war sap enmity-
+    //ct prep mnk sap snapshot
+    //ct prep whm sap mab
+    //ct prep blm sap fc
+    //ct prep rdm sap curepotency
+    //ct prep thf sap waltzpotency
+    //ct prep pld sap petregen
+    //ct prep drk sap pethaste
 
-    //ct prep dye camulus's mantle hp
-    //ct prep dye camulus's mantle mp
-    //ct prep dye camulus's mantle str
-    //ct prep dye camulus's mantle dex
-    //ct prep dye camulus's mantle vit
-    //ct prep dye camulus's mantle agi
-    //ct prep dye camulus's mantle int
-    //ct prep dye camulus's mantle mnd
-    //ct prep dye camulus's mantle chr
-    //ct prep dye camulus's mantle acc
-    //ct prep dye camulus's mantle atk
-    //ct prep dye camulus's mantle racc
-    //ct prep dye camulus's mantle ratk
-    //ct prep dye camulus's mantle macc
-    //ct prep dye camulus's mantle mdmg
-    //ct prep dye camulus's mantle eva
-    //ct prep dye camulus's mantle meva
-    //ct prep dye camulus's mantle petacc
-    //ct prep dye camulus's mantle petatk
-    //ct prep dye camulus's mantle petmacc
-    //ct prep dye camulus's mantle petmdmg
+    //ct prep bst dye hp
+    //ct prep brd dye mp
+    //ct prep rng dye str
+    //ct prep sam dye dex
+    //ct prep nin dye vit
+    //ct prep drg dye agi
+    //ct prep smn dye int
+    //ct prep blu dye mnd
+    //ct prep cor dye chr
+    //ct prep pup dye acc
+    //ct prep dnc dye atk
+    //ct prep sch dye racc
+    //ct prep geo dye ratk
+    //ct prep run dye macc
+    //ct prep war dye mdmg
+    //ct prep mnk dye eva
+    //ct prep whm dye meva
+    //ct prep blm dye petacc
+    //ct prep rdm dye petatk
+    //ct prep thf dye petmacc
+    //ct prep pld dye petmdmg
 
 The **go** command is the second key component of the CapeTrader addon and requires that you have used the prep command correctly beforehand. Remember again that using this command carries with it some risks as described in the usage notes section. If you do not provide an input the go command will by default only augment your cape once. Below are equivalent ways of augmenting your cape 20 times:
 
@@ -153,7 +153,7 @@ There are four parts to the process of augmenting your ambuscade cape:
 
 4. Part 4: Waiting and receiving your newly augmented cape back. This takes anywhere from 1 to 3 seconds and can't be controlled by the player. (Involves the incoming 0x01D packet)
 
-The cape trader addon uses packets in order to substantially speed up parts one and three from above at a speed that would not normally be possible. Therefore if you use this addon you could potentially look suspicious. Part 1 of the process takes only 1 second using this addon. If this makes you uncomfortable you can change the value of the TRADE_DELAY variable in the capeTrader.lua file to a more reasonable amount if you wish. This addon does part 3 pretty much instantaneously once the incoming 0x034 packet is received from part 2. So once again you can look suspicious again during this stage. There is currently no option to add a delay to this at the moment but it is being considered to have such a delay. The time it takes for part 2 and 4 should not be that different from you augmenting capes manually.
+The cape trader addon uses packets in order to substantially speed up parts one and three from above at a speed that would not normally be possible. Therefore if you use this addon you could potentially look suspicious. Part 1 of the process takes only 2 second using this addon. If this makes you uncomfortable you can change the value of the TRADE_DELAY variable in the capeTrader.lua file to a more reasonable amount if you wish. This addon does part 3 pretty much instantaneously once the incoming 0x034 packet is received from part 2. So once again you can look suspicious again during this stage. There is currently no option to add a delay to this at the moment but it is being considered to have such a delay. The time it takes for part 2 and 4 should not be that different from you augmenting capes manually.
 
 The possibility of the loss of augment items comes from part 3. When augmenting normally you will get denied by the npc if you try to trade an already maxed cape. Injecting the 0x036 packet and later the 0x05B packets bypasses this check but you lose your augment items but get your cape back unchanged if you have already maxed an augment path. There are some safeguards to prevent this happening in this addon but it has not been tested on every single augment path. So please use the go command with caution.
 
