@@ -1,4 +1,4 @@
---[[Copyright © 2016, Burntwaffle@Odin
+--[[Copyright © 2016, Lygre, Burntwaffle@Odin
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -16,7 +16,7 @@ modification, are permitted provided that the following conditions are met:
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL Burntwaffle@Odin BE LIABLE FOR ANY
+DISCLAIMED. IN NO EVENT SHALL Lygre, Burntwaffle@Odin BE LIABLE FOR ANY
 DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
@@ -40,8 +40,6 @@ require('chat')
 require('functions')
 require('strings')
 packets = require('packets')
-files = require('files')
-res = require('resources')
 ambuscadeCapeTable = require('allAmbuscadeCapes')
 abdhaljs = require('allAugPaths')
 augItems = require('allAugItems')
@@ -78,6 +76,7 @@ local DUST_INDEX = 2
 local DYE_INDEX = 3
 local SAP_INDEX = 4
 local maxAugKey = nil
+local zoneHasLoaded = false
 
 windower.register_event('addon command', function(...)
 	local args = T{...}
@@ -90,14 +89,18 @@ windower.register_event('addon command', function(...)
 			windower.add_to_chat(123,"You are missing at least one input to the prep command.")
 		end
 	elseif cmd == 'go' then
-		if args[1] then
-			if tonumber(args[1]) then
-				startAugmentingCape(args[1],true)
+		if zoneHasLoaded then
+			if args[1] then
+				if tonumber(args[1]) then
+					startAugmentingCape(args[1],true)
+				else
+					windower.add_to_chat(123,'Error: Not given a numerical argument.')
+				end
 			else
-				windower.add_to_chat(123,'Error: Not given a numerical argument.')
+				startAugmentingCape(1,true)
 			end
 		else
-			startAugmentingCape(1,true)
+			windower.add_to_chat(123,'Your inventory has not yet loaded, please try the go command again when your inventory loads.')
 		end
 	elseif cmd == 'list' or cmd == 'l' then
 		printAugList()
@@ -159,6 +162,11 @@ function validate()
 end
 
 windower.register_event('incoming chunk',function(id,data,modified,injected,blocked)
+
+	 if id == 0x00B or id == 0x00A then
+		 zoneHasLoaded = false --NOTE: This idea was taken from Zohno's findall addon.
+	 end
+
     if id == 0x034 or id == 0x032 then
         if busy and pkt then
 
@@ -170,7 +178,7 @@ windower.register_event('incoming chunk',function(id,data,modified,injected,bloc
 		  		end
 
 			  timesAugmentedCount = timesAugmentedCount + 1
-			  if timesAugmentedCount <= ( numberOfTimesToAugment + 0 )then
+			  if timesAugmentedCount <= ( numberOfTimesToAugment + 0 ) then
 				  windower.add_to_chat(158,timesAugmentedCount - 1 .. '/' .. numberOfTimesToAugment .. ' augments completed.')
 				  busy = false
 				  tradeReady = true
@@ -188,6 +196,9 @@ windower.register_event('incoming chunk',function(id,data,modified,injected,bloc
     end
 
 		 if id == 0x01D then
+			if not zoneHasLoaded then
+				zoneHasLoaded = true
+			end
 			if tradeReady then
 				tradeReady = false
 				functions.schedule(startAugmentingCape, TRADE_DELAY, numberOfTimesToAugment - timesAugmentedCount + 1,false)

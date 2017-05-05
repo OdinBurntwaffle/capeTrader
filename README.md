@@ -4,9 +4,6 @@ Cape Trader is used to automate the process of augmenting ambuscade capes. The c
 ___
 #### Usage notes
 
-
-After downloading, to use capetrader you must first unzip the folder in your addons folder. Be sure to rename this folder to capetrader.
-
 Load the addon by using the following command:
 
     //lua load capetrader
@@ -15,7 +12,7 @@ There are some conditions that you need to meet in order to use the important go
 
 1. You must be in Mhaura and be within a distance of 6 to the Gorpa-Masorpa npc.
 
-2. If you have only recently zoned into Mhaura make sure your inventory has completely finished loading before using the go command.
+2. If you have recently zoned into Mhaura you will have to wait to use the go command until your inventory loads.
 
 3. Make sure there is only one of the given cape you want to augment in your inventory. For example if you are intending to augment an ogma's cape, there should only be one ogma's cape in your inventory.
 
@@ -23,7 +20,7 @@ There are some conditions that you need to meet in order to use the important go
 
 5. It is also possible to lose augment items if you try to augment a cape with a different path than is already present. Suppose again you have an ogma's cape augmented with DEX+5 via threads. If you enter the **//ct prep run thread str** and then the **//ct go 15** command intending to augment your cape with str, **you will lose all 15 threads**. There is currently no safeguard for this but one is currently being considered to be added to the capetrader addon.
 
-6. If you have the inventory menu open, be sure to close before using the go commmand and make sure you do not open menus or move items around in your inventories while the augmentation process is ongoing. You will get a start message after you use the go command and an ending message once the augmentation process completes. You can mess around with your inventory after you get the ending message, otherwise you will interupt the augmentation process.
+6. If you have the inventory menu open, be sure to close before using the go commmand and make sure you do not open menus or move items around in your inventories while the augmentation process is ongoing. You will get a start message after you use the go command and an ending message once the augmentation process completes. You can mess around with your inventory after you get the ending message, otherwise you might interupt the augmentation process and need to reload the addon.
 
 
 Suppose you want to augment an ogma's cape from scratch with dex, accuracy and attack, and double attack. You can use the following steps:
@@ -155,6 +152,6 @@ There are four parts to the process of augmenting your ambuscade cape:
 
 The cape trader addon uses packets in order to substantially speed up parts one and three from above at a speed that would not normally be possible. Therefore if you use this addon you could potentially look suspicious. Part 1 of the process takes only 1 second using this addon. If this makes you uncomfortable you can change the value of the TRADE_DELAY variable in the capeTrader.lua file to a more reasonable amount if you wish. This addon does part 3 pretty much instantaneously once the incoming 0x034 packet is received from part 2. So once again you can look suspicious again during this stage. There is currently no option to add a delay to this at the moment but it is being considered to have such a delay. The time it takes for part 2 and 4 should not be that different from you augmenting capes manually.
 
-The possibility of the loss of augment items comes from part 3. When augmenting normally you will get denied by the npc if you try to trade an already maxed cape. Injecting the 0x036 packet and later the 0x05B packets bypasses this check but you lose your augment items but get your cape back unchanged if you have already maxed an augment path. There are some safeguards to prevent this happening in this addon but it has not been tested on every single augment path. So please use the go command with caution.
+The possibility of the loss of augment items comes from part 3. When augmenting manually you will get denied by the npc if you try to trade an already maxed cape. Injecting the 0x036 packet and later the 0x05B packets bypasses this check but you lose your augment items but receive your cape back unchanged if you have already maxed an augment path. There are some safeguards to prevent this happening in this addon but it has not been tested on every single augment path. So please use the go command with caution.
 
 Please keep all of the above in mind before deciding to use this addon. If you do decide to use CapeTrader I hope you find it useful!
