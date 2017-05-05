@@ -142,11 +142,11 @@ ___
 #### Warnings and notes on the relevant packets
 There are four parts to the process of augmenting your ambuscade cape:
 
-1. Part 1: Targetting gorpa-masorpa plus putting together and trading the relevant items. This takes me about 10 seconds to complete. (Involves outgoing packet 0x036)
+1. Part 1: Targetting gorpa-masorpa plus putting together and trading the relevant items. This takes me about 10 seconds to complete manually. (Involves outgoing packet 0x036)
 
 2. Part 2: Waiting for the dialog menu to pop up and become usable. This takes about 1 second and can't be controlled by the player. (Involves the incoming 0x034 packet.)
 
-3. Part 3: Navigating the menu to confirm and augment your cape. This takes me 2-3 seconds to confirm. (Involves 2 outgoing 0x05B packets)
+3. Part 3: Navigating the menu to confirm and augment your cape. This takes me 2-3 seconds to confirm manually. (Involves 2 outgoing 0x05B packets)
 
 4. Part 4: Waiting and receiving your newly augmented cape back. This takes anywhere from 1 to 3 seconds and can't be controlled by the player. (Involves the incoming 0x01D packet)
 

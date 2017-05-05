@@ -34,9 +34,7 @@ _addon.commands = {'capetrader','ct'}
 require('luau')
 require('pack')
 require('lists')
-require('logger')
 require('sets')
-require('chat')
 require('functions')
 require('strings')
 packets = require('packets')
@@ -76,7 +74,8 @@ local DUST_INDEX = 2
 local DYE_INDEX = 3
 local SAP_INDEX = 4
 local maxAugKey = nil
-local zoneHasLoaded = false
+local zoneHasLoaded = true
+local inventory = nil
 
 windower.register_event('addon command', function(...)
 	local args = T{...}
@@ -90,6 +89,7 @@ windower.register_event('addon command', function(...)
 		end
 	elseif cmd == 'go' then
 		if zoneHasLoaded then
+			inventory = windower.ffxi.get_items(INVENTORY_BAG_NUMBER)
 			if args[1] then
 				if tonumber(args[1]) then
 					startAugmentingCape(args[1],true)
@@ -114,7 +114,6 @@ windower.register_event('addon command', function(...)
 end)
 
 function getCapeIndex(capeID)
-	local inventory = windower.ffxi.get_items(INVENTORY_BAG_NUMBER)
 	local capeToAug = ambuscadeCapeTable[capeID]
 
 	for itemIndex, item in pairs(inventory) do
@@ -125,7 +124,6 @@ function getCapeIndex(capeID)
 end
 
 function getAugItemIndex(augItemName)
-	local inventory = windower.ffxi.get_items(INVENTORY_BAG_NUMBER)
 	local augItem = augItems[augItemName]
 
 	for itemIndex, item in pairs(inventory) do
@@ -228,7 +226,7 @@ function checkThreadDustDyeSapCount(augmentType,numberOfAugmentAttempts)
 		local augID = augItem.id
 		local augItemCount = 0
 
-		for key,itemTable in pairs(windower.ffxi.get_items(INVENTORY_BAG_NUMBER)) do --0 is inventory bag id
+		for key,itemTable in pairs(inventory) do --0 is inventory bag id
 	      if key ~= 'max' and key ~= 'count' and key ~= 'enabled' then
 	         local itemID = itemTable.id
             if itemID == augID then
@@ -281,7 +279,7 @@ function checkCapeCount()
 			end
 		end
 
-		for key,itemTable in pairs(windower.ffxi.get_items(INVENTORY_BAG_NUMBER)) do --0 is inventory bag id
+		for key,itemTable in pairs(inventory) do
 	      if key ~= 'max' and key ~= 'count' and key ~= 'enabled' then
 	         local itemID = itemTable.id
 	         if itemID ~= 0 then
@@ -442,10 +440,9 @@ function checkAugLimits()
 		end
 	end
 
-	local invent = windower.ffxi.get_items(INVENTORY_BAG_NUMBER)
 	local capeItem
 
-	for index, item in pairs(invent) do
+	for index, item in pairs(inventory) do
 		if index ~= 'max' and index ~= 'count' and index ~= 'enabled' then
 			if item.id == capeID then
 				capeItem = item
