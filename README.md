@@ -57,21 +57,21 @@ The **help** command displays all of the possible commands of CapeTrader in your
     //capetrader help
     //capetrader h
 
-The **reload** command reloads the addon. Useful if you ever the addon ever getting stuck in the augmentation process. The below are equivalent:
+The **reload** command reloads the addon. Useful if the capetrader addon ever gets stuck during the augmentation process. The below are equivalent:
 
     //ct reload
     //ct r
     //capetrader reload
     //capetrader r
 
-The **unload** command reloads the addon. Useful if you ever the addon ever getting stuck in the augmentation process or want to unload the addon quickly. The below are equivalent:
+The **unload** command reloads the addon. Useful if the capetrader addon ever gets stuck during the augmentation process or you want to unload the addon quickly. The below are equivalent:
 
     //ct unload
     //ct u
     //capetrader unload
     //capetrader u
 
-The **prep** command is one of the key components of this addon's function. This command tells the go command how to augment your cape. There are three inputs to the prep command. First is the 3 letter abbreviation of the job on the cape, for example: cor blm whm pup. The second is the type of augment item you need to use: thread, dust, sap and dye.  Third is the augment path. Note that none of these inputs are case sensitive. Also in case you are not sure exactly what to input for the augment path input, you can use the list command or use the following list for reference. Below are all of the possible ways to prepare all of the different ambuscade capes:
+The **prep** command is one of the key components of this addon's function. This command tells the go command how to augment your cape. There are three inputs to the prep command. First is the 3 letter abbreviation of the job on the cape, for example: cor blm whm pup. The second is the type of augment item you need to use: thread, dust, sap and dye.  Third is the augment path. Note that none of these inputs are case sensitive. Also in case you are not sure exactly what to input for the augment path, you can use the list command or use the following list for reference. Below are all of the possible combinations of valid augment paths:
 
     //ct prep war thread hp
     //ct prep mnk thread mp
