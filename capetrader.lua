@@ -37,6 +37,7 @@ require('lists')
 require('sets')
 require('functions')
 require('strings')
+timeit = require('timeit')
 packets = require('packets')
 ambuscadeCapeTable = require('allAmbuscadeCapes')
 abdhaljs = require('allAugPaths')
@@ -77,10 +78,8 @@ local maxAugKey = nil
 local zoneHasLoaded = true
 local inventory = nil
 
-windower.register_event('addon command', function(...)
-	local args = T{...}
-	local cmd = string.lower(args[1])
-	args:remove(1)
+windower.register_event('addon command', function(input,...)
+	local cmd = string.lower(input)
 	if cmd == 'prep' then
 		if args[1] and args[2] and args[3] then
 			prepareCapeForAugments(args[2],args[1],args[3])
@@ -110,6 +109,13 @@ windower.register_event('addon command', function(...)
       windower.send_command('lua unload ' .. _addon.name)
    elseif cmd == 'reload' or cmd == 'r' then
       windower.send_command('lua reload ' .. _addon.name)
+	elseif cmd == 'test' then
+			local timer2 = timeit.new()
+			timeit.start(timer2)
+			local PI = windower.ffxi.get_mob_by_target('me').index
+			windower.add_to_chat(465,'get_mob_by_target: ' .. tostring(PI) .. ' Time: ' .. tostring(timeit.stop(timer2)))
+	else
+		windower.add_to_chat(123,'You entered an unknown command, enter //ct help if you forget your commands.')
 	end
 end)
 
@@ -145,18 +151,6 @@ function build_trade()
 			["Number of Items"]=2})
 		packets.inject(packet)
 	end
-end
-
-function validate()
-	local zone = windower.ffxi.get_info()['zone']
-	local me
-	local result = {}
-	for i,v in pairs(windower.ffxi.get_mob_array()) do
-		if v['name'] == windower.ffxi.get_player().name then
-			result['me'] = i
-		end
-	end
-	return result
 end
 
 windower.register_event('incoming chunk',function(id,data,modified,injected,blocked)
@@ -401,7 +395,7 @@ function startAugmentingCape(numberOfRepeats,firstAttempt)
 				windower.add_to_chat(466,'Starting to augment your ' .. cape_name .. ' ' .. numberOfRepeats .. ' ' .. temp)
 			end
 
-			pkt = validate()
+			pkt = windower.ffxi.get_mob_by_target('me').index
 	  		busy = true
 			tradeReady = false
 	  		build_trade()
@@ -413,7 +407,7 @@ function startAugmentingCape(numberOfRepeats,firstAttempt)
 	elseif safeToAugment and not busy and not firstPass and not firstAttempt then
 		if augStatus ~= 'maxed' then
 			busy = true
-			pkt = validate()
+			pkt = windower.ffxi.get_mob_by_target('me').index
 			tradeReady = false
 			build_trade()
 		else
