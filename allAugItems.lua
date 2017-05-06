@@ -27,7 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.]]--
 
 return T{
 	['thread'] = {id=9220,en="Abdhaljs Thread",ja="アブダルスの糸",enl="spool of Abdhaljs thread",jal="アブダルスの糸",category="General",flags=28736,stack=99,targets=0,type=1},
- 	['dust'] = {id=9221,en="Abdhaljs Dust",ja="アブダルスの金粉",enl="pinch of Abdhaljs dust",jal="アブダルスの金粉",category="General",flags=28736,stack=99,targets=0,type=1},
-   ['dye'] = {id=9222,en="Abdhaljs Dye",ja="アブダルスの染料",enl="pot of Abdhaljs dye",jal="アブダルスの染料",category="General",flags=28736,stack=99,targets=0,type=1},
-   ['sap'] = {id=9223,en="Abdhaljs Sap",ja="アブダルスの水油",enl="bottle of Abdhaljs sap",jal="アブダルスの水油",category="General",flags=28736,stack=99,targets=0,type=1},
+	['dust'] = {id=9221,en="Abdhaljs Dust",ja="アブダルスの金粉",enl="pinch of Abdhaljs dust",jal="アブダルスの金粉",category="General",flags=28736,stack=99,targets=0,type=1},
+	['dye'] = {id=9222,en="Abdhaljs Dye",ja="アブダルスの染料",enl="pot of Abdhaljs dye",jal="アブダルスの染料",category="General",flags=28736,stack=99,targets=0,type=1},
+	['sap'] = {id=9223,en="Abdhaljs Sap",ja="アブダルスの水油",enl="bottle of Abdhaljs sap",jal="アブダルスの水油",category="General",flags=28736,stack=99,targets=0,type=1},
 }
