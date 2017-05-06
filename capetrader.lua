@@ -109,11 +109,6 @@ windower.register_event('addon command', function(input,...)
       windower.send_command('lua unload ' .. _addon.name)
    elseif cmd == 'reload' or cmd == 'r' then
       windower.send_command('lua reload ' .. _addon.name)
-	elseif cmd == 'test' then
-			local timer2 = timeit.new()
-			timeit.start(timer2)
-			local PI = windower.ffxi.get_mob_by_target('me').index
-			windower.add_to_chat(465,'get_mob_by_target: ' .. tostring(PI) .. ' Time: ' .. tostring(timeit.stop(timer2)))
 	else
 		windower.add_to_chat(123,'You entered an unknown command, enter //ct help if you forget your commands.')
 	end
