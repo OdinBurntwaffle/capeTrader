@@ -22,6 +22,8 @@ There are some conditions that you need to meet in order to use the important go
 
 6. If you have the inventory menu open, be sure to close before using the go commmand and make sure you do not open menus or move items around in your inventories while the augmentation process is ongoing. You will get a start message after you use the go command and an ending message once the augmentation process completes. You can mess around with your inventory after you get the ending message, otherwise you might interupt the augmentation process and need to reload the addon.
 
+7. There is currently a bug involving dye (maybe other paths as well) where the augmentation process will stop after augmenting a cape with dye for the first time. Try using //ct go 1 to avoid this. If the augmentation process ever seems to stop for any augment path/item combo, I recommend using the **//ct reload** command and start the process over again.
+
 
 Suppose you want to augment an ogma's cape from scratch with dex, accuracy and attack, and double attack. You can use the following steps:
 

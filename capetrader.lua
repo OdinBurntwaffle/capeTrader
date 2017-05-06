@@ -30,6 +30,7 @@ _addon.version  = '1.0.2'
 _addon.commands = {'capetrader','ct'}
 
 --TODO:Add safeguards for trying to augment a cape with a non matching aug path. ie attempting to aug a cape with str when it already has dex
+--TODO:Try to find what causes dye augment paths to augment only once on a first pass.
 
 require('luau')
 require('pack')
@@ -37,7 +38,6 @@ require('lists')
 require('sets')
 require('functions')
 require('strings')
-timeit = require('timeit')
 packets = require('packets')
 ambuscadeCapeTable = require('allAmbuscadeCapes')
 abdhaljs = require('allAugPaths')
@@ -46,7 +46,7 @@ maxAugMap = require('maxAugMap')
 extData = require('extdata')
 jobToCapeMap = require('jobToCapeMap')
 
-local pkt = {}
+local playerIndex = nil
 
 local npc = 17797273
 local target_index = 153
@@ -81,17 +81,17 @@ local inventory = nil
 windower.register_event('addon command', function(input,...)
 	local cmd = string.lower(input)
 	if cmd == 'prep' then
-		if args[1] and args[2] and args[3] then
-			prepareCapeForAugments(args[2],args[1],args[3])
+		if arg[1] and arg[2] and arg[3] then
+			prepareCapeForAugments(arg[2],arg[1],arg[3])
 		else
 			windower.add_to_chat(123,"You are missing at least one input to the prep command.")
 		end
 	elseif cmd == 'go' then
 		if zoneHasLoaded then
 			inventory = windower.ffxi.get_items(INVENTORY_BAG_NUMBER)
-			if args[1] then
-				if tonumber(args[1]) then
-					startAugmentingCape(args[1],true)
+			if arg[1] then
+				if tonumber(arg[1]) then
+					startAugmentingCape(arg[1],true)
 				else
 					windower.add_to_chat(123,'Error: Not given a numerical argument.')
 				end
@@ -160,7 +160,7 @@ windower.register_event('incoming chunk',function(id,data,modified,injected,bloc
 	 end
 
     if id == 0x034 or id == 0x032 then
-        if busy and pkt then
+        if busy and playerIndex then
 
 			  	if not firstTimeAug then
 			  		injectAugPackets()
@@ -177,7 +177,7 @@ windower.register_event('incoming chunk',function(id,data,modified,injected,bloc
 			  else
 				  safeToAugment = false
 				  busy = false
-				  pkt = nil
+				  playerIndex = nil
 				  maxAugKey = nil
 				  tradeReady = false
 				  functions.schedule(sendCompletedMessage,2)
@@ -385,7 +385,7 @@ function startAugmentingCape(numberOfRepeats,firstAttempt)
 
 				firstPass = false
 				local temp
-				if numberOfRepeats == 1 then
+				if tonumber(numberOfRepeats) == 1 then
 					temp = 'time.'
 				else
 					temp = 'times.'
@@ -395,26 +395,26 @@ function startAugmentingCape(numberOfRepeats,firstAttempt)
 				windower.add_to_chat(466,'Starting to augment your ' .. cape_name .. ' ' .. numberOfRepeats .. ' ' .. temp)
 			end
 
-			pkt = windower.ffxi.get_mob_by_target('me').index
+			playerIndex = windower.ffxi.get_mob_by_target('me').index
 	  		busy = true
 			tradeReady = false
 	  		build_trade()
 		else
 			busy = false
 			tradeReady = false
-			pkt = nil
+			playerIndex = nil
 		end
 	elseif safeToAugment and not busy and not firstPass and not firstAttempt then
 		if augStatus ~= 'maxed' then
 			busy = true
-			pkt = windower.ffxi.get_mob_by_target('me').index
+			playerIndex = windower.ffxi.get_mob_by_target('me').index
 			tradeReady = false
 			build_trade()
 		else
 			safeToAugment = false
 			busy = false
 			tradeReady = false
-			pkt = nil
+			playerIndex = nil
 			maxAugKey = nil
 			windower.add_to_chat(466,'Your cape is currently maxed in that augment path, ending the augment process now.')
 		end
@@ -480,59 +480,59 @@ function checkAugLimits()
 end
 
 function injectFirstAugPackets()
-  local packet = packets.new('outgoing', 0x05B)
-  packet["Target"]=npc
-  packet["Option Index"]=512
-  packet["_unknown1"]=opt_ind
-  packet["Target Index"]=target_index
-  packet["Automated Message"]=true
-  packet["_unknown2"]=0
-  packet["Zone"]=zone
-  packet["Menu ID"]=menu
-  packets.inject(packet)
+	local packet = packets.new('outgoing', 0x05B)
+	packet["Target"]=npc
+	packet["Option Index"]=512
+	packet["_unknown1"]=opt_ind
+	packet["Target Index"]=target_index
+	packet["Automated Message"]=true
+	packet["_unknown2"]=0
+	packet["Zone"]=zone
+	packet["Menu ID"]=menu
+	packets.inject(packet)
 
-  local packet = packets.new('outgoing', 0x05B)
-  packet["Target"]=npc
-  packet["Option Index"]=512
-  packet["_unknown1"]=opt_ind
-  packet["Target Index"]=target_index
-  packet["Automated Message"]=false
-  packet["_unknown2"]=0
-  packet["Zone"]=zone
-  packet["Menu ID"]=menu
-  packets.inject(packet)
-  local packet = packets.new('outgoing', 0x016, {
-  		["Target Index"]=pkt['me'],
-  })
-  packets.inject(packet)
+	local packet = packets.new('outgoing', 0x05B)
+	packet["Target"]=npc
+	packet["Option Index"]=512
+	packet["_unknown1"]=opt_ind
+	packet["Target Index"]=target_index
+	packet["Automated Message"]=false
+	packet["_unknown2"]=0
+	packet["Zone"]=zone
+	packet["Menu ID"]=menu
+	packets.inject(packet)
+	local packet = packets.new('outgoing', 0x016, {
+		["Target Index"]=playerIndex,
+	})
+	packets.inject(packet)
 end
 
 function injectAugPackets()
-  local packet = packets.new('outgoing', 0x05B)
-  packet["Target"]=npc
-  packet["Option Index"]=256
-  packet["_unknown1"]=opt_ind
-  packet["Target Index"]=target_index
-  packet["Automated Message"]=true
-  packet["_unknown2"]=0
-  packet["Zone"]=zone
-  packet["Menu ID"]=menu
-  packets.inject(packet)
+	local packet = packets.new('outgoing', 0x05B)
+	packet["Target"]=npc
+	packet["Option Index"]=256
+	packet["_unknown1"]=opt_ind
+	packet["Target Index"]=target_index
+	packet["Automated Message"]=true
+	packet["_unknown2"]=0
+	packet["Zone"]=zone
+	packet["Menu ID"]=menu
+	packets.inject(packet)
 
-  local packet = packets.new('outgoing', 0x05B)
-  packet["Target"]=npc
-  packet["Option Index"]=256
-  packet["_unknown1"]=opt_ind
-  packet["Target Index"]=target_index
-  packet["Automated Message"]=false
-  packet["_unknown2"]=0
-  packet["Zone"]=zone
-  packet["Menu ID"]=menu
-  packets.inject(packet)
-  local packet = packets.new('outgoing', 0x016, {
-  		["Target Index"]=pkt['me'],
-  })
-  packets.inject(packet)
+	local packet = packets.new('outgoing', 0x05B)
+	packet["Target"]=npc
+	packet["Option Index"]=256
+	packet["_unknown1"]=opt_ind
+	packet["Target Index"]=target_index
+	packet["Automated Message"]=false
+	packet["_unknown2"]=0
+	packet["Zone"]=zone
+	packet["Menu ID"]=menu
+	packets.inject(packet)
+	local packet = packets.new('outgoing', 0x016, {
+		["Target Index"]=playerIndex,
+	})
+	packets.inject(packet)
 end
 
 function sendCompletedMessage()
