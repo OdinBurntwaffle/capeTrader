@@ -417,7 +417,7 @@ function startAugmentingCape(numberOfRepeats, firstAttempt)
 		windower.add_to_chat(123, 'You are currently still augmenting a cape, please wait until the process finishes.')
 	elseif not safeToAugment then
 		windower.add_to_chat(123, 'You have not yet setup your cape and augment information with the //ct prep command!')
-end
+	end
 end
 
 function checkAugLimits()
