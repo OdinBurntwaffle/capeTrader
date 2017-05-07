@@ -339,7 +339,7 @@ function prepareCapeForAugments(augItemType, jobName, augPath)
 			end
 
 			if not isValidPath then
-				windower.add_to_chat(123, 'The augment path you entered is not valid. Please check the possible augment list for abdhaljs ' .. string.lower(augItemType) .. ' or for a typo. You entered: ' .. augPath)
+				windower.add_to_chat(123, 'The augment path you entered is not valid. Please check the possible augment list for ' .. string.lower(augItemType) .. ' using the //ct list command. You entered: ' .. augPath)
 				validArguments = false
 			end
 		end
