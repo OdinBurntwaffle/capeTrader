@@ -29,8 +29,8 @@ _addon.author = 'Lygre, Burntwaffle'
 _addon.version = '1.0.2'
 _addon.commands = {'capetrader', 'ct'}
 
---TODO:Add safeguards for trying to augment a cape with a non matching aug path. ie attempting to aug a cape with str when it already has dex
---TODO:Try to find what causes dye augment paths to augment only once on a first pass.
+--TODO:Add safeguards for trying to augment a cape with a non matching augment path. For example attempting to augment a cape with str when it already has dex
+--TODO:Try to fix the bug where dye augment paths only augment once on a first pass and stop the augmentation process. A longer trade delay might fix this.
 
 require('luau')
 require('pack')
@@ -143,7 +143,8 @@ function build_trade()
 			["Item Count 2"] = 1,
 			["Item Index 1"] = cape_ind,
 			["Item Index 2"] = aug_ind,
-		["Number of Items"] = 2})
+			["Number of Items"] = 2
+		})
 		packets.inject(packet)
 	end
 end
@@ -237,7 +238,7 @@ function checkThreadDustDyeSapCount(augmentType, numberOfAugmentAttempts)
 			local temp
 			if (numberOfAugmentAttempts + 0) > 1 then
 				temp = ' times.'
-			elseif numberOfAugmentAttempts == 1 then
+			elseif (numberOfAugmentAttempts + 0) == 1 then
 				temp = ' time.'
 			end
 			windower.add_to_chat(123, 'You do not have enough ' .. augItem.en .. ' to augment that cape ' .. numberOfAugmentAttempts .. temp ..' You only have ' .. augItemCount .. ' in your inventory.')
@@ -496,6 +497,7 @@ function injectFirstAugPackets()
 	packet["Zone"] = zone
 	packet["Menu ID"] = menu
 	packets.inject(packet)
+	
 	local packet = packets.new('outgoing', 0x016, {
 		["Target Index"] = playerIndex,
 	})
@@ -524,6 +526,7 @@ function injectAugPackets()
 	packet["Zone"] = zone
 	packet["Menu ID"] = menu
 	packets.inject(packet)
+
 	local packet = packets.new('outgoing', 0x016, {
 		["Target Index"] = playerIndex,
 	})
