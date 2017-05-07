@@ -301,7 +301,7 @@ function prepareCapeForAugments(augItemType, jobName, augPath)
 		local augItemTypeIsValid = false
 
 		if not S{'sap', 'dye', 'thread', 'dust'}:contains(string.lower(augItemType)) then
-			windower.add_to_chat(123, 'Error with the type of augment item you entered. The first input should be sap or dye or thread or dust. You entered: ' .. string.lower(augItemType))
+			windower.add_to_chat(123, 'Error with the type of augment item you entered. The second input should be sap or dye or thread or dust. You entered: ' .. string.lower(augItemType))
 			validArguments = false
 		else
 			aug_name = 'Abdhaljs ' .. augItemType .. ''
