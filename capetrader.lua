@@ -30,11 +30,10 @@ _addon.version = '1.0.2'
 _addon.commands = {'capetrader', 'ct'}
 
 --TODO:Add safeguards for trying to augment a cape with a non matching augment path. For example attempting to augment a cape with str when it already has dex
---TODO:Try to fix the bug where dye augment paths only augment once on a first pass and stop the augmentation process. A longer trade delay might fix this.
+--TODO:Try to fix the bug where upon using a dye for the first time the augmentation process stops after one trade. A longer trade delay might fix this.
 
 require('luau')
 require('pack')
-require('lists')
 require('sets')
 require('functions')
 require('strings')
@@ -47,17 +46,14 @@ extData = require('extdata')
 jobToCapeMap = require('jobToCapeMap')
 
 local playerIndex = nil
-
 local npc = 17797273
 local target_index = 153
 local menu = 387
 local zone = 249
 local cape_name = ""
-local aug_name = ""
 local pathName = nil
 local opt_ind
 local path_item = ''
-local menu_params
 local INVENTORY_BAG_NUMBER = 0
 local MAX_AMOUNT_DUST_THREAD = 20
 local MAX_AMOUNT_SAP_DYE = 10
@@ -69,6 +65,7 @@ local timesAugmentedCount = nil
 local numberOfTimesToAugment = nil
 local firstPass = false
 local TRADE_DELAY = 1
+local TRADE_DELAY_DYE = 2
 local tradeReady = false
 local THREAD_INDEX = 1
 local DUST_INDEX = 2
@@ -166,7 +163,7 @@ windower.register_event('incoming chunk', function(id, data, modified, injected,
 			end
 
 			timesAugmentedCount = timesAugmentedCount + 1
-			if timesAugmentedCount <= ( numberOfTimesToAugment + 0 ) then
+			if timesAugmentedCount <= tonumber(numberOfTimesToAugment) then
 				windower.add_to_chat(158, timesAugmentedCount - 1 .. '/' .. numberOfTimesToAugment .. ' augments completed.')
 				busy = false
 				tradeReady = true
@@ -189,7 +186,12 @@ windower.register_event('incoming chunk', function(id, data, modified, injected,
 		end
 		if tradeReady then
 			tradeReady = false
-			functions.schedule(startAugmentingCape, TRADE_DELAY, numberOfTimesToAugment - timesAugmentedCount + 1, false)
+
+			if path_item ~= 'dye' then
+				functions.schedule(startAugmentingCape, TRADE_DELAY, numberOfTimesToAugment - timesAugmentedCount + 1, false)
+			else
+				functions.schedule(startAugmentingCape, TRADE_DELAY_DYE, numberOfTimesToAugment - timesAugmentedCount + 1, false)--TODO:I don't know if this will fix the bug described in the readme.
+			end
 		end
 	end
 end)
@@ -225,20 +227,20 @@ function checkThreadDustDyeSapCount(augmentType, numberOfAugmentAttempts)
 			end
 		end
 
-		if (numberOfAugmentAttempts + 0) < 1 then
+		if tonumber(numberOfAugmentAttempts) < 1 then
 			windower.add_to_chat(123, 'Please enter a number of 1 or greater.')
 			return false
-		elseif (numberOfAugmentAttempts + 0) > MAX_AMOUNT_SAP_DYE and (string.lower(path_item) == 'dye' or string.lower(path_item) == 'sap') then
+		elseif tonumber(numberOfAugmentAttempts) > MAX_AMOUNT_SAP_DYE and (path_item == 'dye' or path_item == 'sap') then
 			windower.add_to_chat(123, 'For sap or dye, the max number of times you can augment a cape is ' .. MAX_AMOUNT_SAP_DYE .. ' times. You entered: ' .. numberOfAugmentAttempts)
 			return false
-		elseif (numberOfAugmentAttempts + 0) > MAX_AMOUNT_DUST_THREAD and (string.lower(path_item) == 'dust' or string.lower(path_item) == 'thread') then
+		elseif tonumber(numberOfAugmentAttempts) > MAX_AMOUNT_DUST_THREAD and (path_item == 'dust' or path_item == 'thread') then
 			windower.add_to_chat(123, 'For dust or thread, the max number of times you can augment a cape is ' .. MAX_AMOUNT_DUST_THREAD .. ' times. You entered: ' .. numberOfAugmentAttempts)
 			return false
-		elseif (numberOfAugmentAttempts + 0) > augItemCount then
+		elseif tonumber(numberOfAugmentAttempts) > augItemCount then
 			local temp
-			if (numberOfAugmentAttempts + 0) > 1 then
+			if tonumber(numberOfAugmentAttempts) > 1 then
 				temp = ' times.'
-			elseif (numberOfAugmentAttempts + 0) == 1 then
+			elseif tonumber(numberOfAugmentAttempts) == 1 then
 				temp = ' time.'
 			end
 			windower.add_to_chat(123, 'You do not have enough ' .. augItem.en .. ' to augment that cape ' .. numberOfAugmentAttempts .. temp ..' You only have ' .. augItemCount .. ' in your inventory.')
@@ -257,7 +259,6 @@ end
 --Make sure there is only one cape currently in inventory.
 function checkCapeCount()
 	local capeCount = 0
-	local notFound = true
 	local capeID
 
 	if cape_name ~= "" and cape_name then
@@ -305,8 +306,7 @@ function prepareCapeForAugments(augItemType, jobName, augPath)
 			windower.add_to_chat(123, 'Error with the type of augment item you entered. The second input should be sap or dye or thread or dust. You entered: ' .. string.lower(augItemType))
 			validArguments = false
 		else
-			aug_name = 'Abdhaljs ' .. augItemType .. ''
-			path_item = augItemType
+			path_item = string.lower(augItemType)
 			augItemTypeIsValid = true
 		end
 
@@ -329,7 +329,7 @@ function prepareCapeForAugments(augItemType, jobName, augPath)
 
 		if augPath and augItemTypeIsValid then
 			local isValidPath = false
-			for i, v in pairs(abdhaljs[string.lower(path_item)]) do
+			for i, v in pairs(abdhaljs[path_item]) do
 				if augPath:lower() == v:lower() then
 					opt_ind = i
 					pathName = augPath
@@ -354,7 +354,6 @@ function prepareCapeForAugments(augItemType, jobName, augPath)
 			maxAugKey = nil
 			safeToAugment = false
 			opt_ind = nil
-			aug_name = nil
 			path_item = nil
 			path_name = nil
 			cape_name = nil
@@ -371,7 +370,7 @@ function startAugmentingCape(numberOfRepeats, firstAttempt)
 		augStatus = checkAugLimits()
 	end
 	if safeToAugment and not busy and firstAttempt and augStatus then
-		if capeCountsafe and checkThreadDustDyeSapCount(string.lower(path_item), numberOfRepeats) and checkDistanceToNPC() and string.lower(augStatus) ~= 'maxed' then
+		if capeCountsafe and checkThreadDustDyeSapCount(path_item, numberOfRepeats) and checkDistanceToNPC() and string.lower(augStatus) ~= 'maxed' then
 			if firstPass then
 				if string.lower(augStatus) ~= 'empty' then
 					firstTimeAug = false
@@ -447,13 +446,13 @@ function checkAugLimits()
 
 	local augValue
 	if augmentTable then
-		if string.lower(path_item) == 'thread' then
+		if path_item == 'thread' then
 			augValue = augmentTable[THREAD_INDEX]
-		elseif string.lower(path_item) == 'dust' then
+		elseif path_item == 'dust' then
 			augValue = augmentTable[DUST_INDEX]
-		elseif string.lower(path_item) == 'dye' then
+		elseif path_item == 'dye' then
 			augValue = augmentTable[DYE_INDEX]
-		elseif string.lower(path_item) == 'sap' then
+		elseif path_item == 'sap' then
 			augValue = augmentTable[SAP_INDEX]
 		end
 	else
@@ -497,7 +496,7 @@ function injectFirstAugPackets()
 	packet["Zone"] = zone
 	packet["Menu ID"] = menu
 	packets.inject(packet)
-	
+
 	local packet = packets.new('outgoing', 0x016, {
 		["Target Index"] = playerIndex,
 	})
