@@ -190,7 +190,7 @@ windower.register_event('incoming chunk', function(id, data, modified, injected,
 			if path_item ~= 'dye' then
 				functions.schedule(startAugmentingCape, TRADE_DELAY, numberOfTimesToAugment - timesAugmentedCount + 1, false)
 			else
-				functions.schedule(startAugmentingCape, TRADE_DELAY_DYE, numberOfTimesToAugment - timesAugmentedCount + 1, false)--TODO:I don't know if this will fix the bug described in the readme.
+				functions.schedule(startAugmentingCape, TRADE_DELAY_DYE, numberOfTimesToAugment - timesAugmentedCount + 1, false)--TODO:I don't know if this will fix the dye bug described in the readme.
 			end
 		end
 	end
