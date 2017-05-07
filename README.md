@@ -8,7 +8,7 @@ Load the addon by using the following command:
 
     //lua load capetrader
 
-There are some conditions that you need to meet in order to use the important go and prep commands. Points 4 and 5 are particularly important to consider:
+There are some conditions that you need to meet in order to use the important go and prep commands. Point 5 is particularly important to consider:
 
 1. You must be in Mhaura and be within a distance of 6 to the Gorpa-Masorpa npc.
 
