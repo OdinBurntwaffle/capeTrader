@@ -157,4 +157,3 @@ The cape trader addon uses packets in order to substantially speed up parts one 
 The possibility of the loss of augment items comes from part 3. When augmenting manually you will get denied by the npc if you try to trade an already maxed cape. Injecting the 0x036 packet and later the 0x05B packets bypasses this check but you lose your augment items but receive your cape back unchanged if you have already maxed an augment path. There are some safeguards to prevent this happening in this addon but it has not been tested on every single augment path. So please use the go command with caution.
 
 Please keep all of the above in mind before deciding to use this addon. If you do decide to use CapeTrader I hope you find it useful!
-vv
