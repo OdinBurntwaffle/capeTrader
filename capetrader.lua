@@ -547,7 +547,7 @@ function printHelp()
 	windower.add_to_chat(466, string.format('%s Version: %s Command Listing:', _addon.name, _addon.version))
 	windower.add_to_chat(466, '   reload|r Reload CapeTrader.')
 	windower.add_to_chat(466, '   unload|u Unload CapeTrader.')
-	windower.add_to_chat(466, '   prep <jobName> <augItem> <augPath> Prepares a given job\'s cape with augItem on augPath. Need to use this before using /  / ct go.')
+	windower.add_to_chat(466, '   prep <jobName> <augItem> <augPath> Prepares a given job\'s cape with augItem on augPath. Need to use this before using // ct go.')
 	windower.add_to_chat(466, '   go <#repeats> Starts augmenting cape with the info gathered from the prep command. The repeats input defaults to one if not provided.')
 	windower.add_to_chat(466, '   list|l Lists all possible augitems and their valid paths. Use to know what the valid inputs for //ct prep are.')
 end
