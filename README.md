@@ -8,11 +8,11 @@ Load the addon by using the following command:
 
     //lua load capetrader
 
-There are some conditions that you need to meet in order to use the important go and prep commands: 
+There are some conditions that you need to meet in order to use the important go and prep commands:
 
 1. You must be in Mhaura and be within a distance of 6 to the Gorpa-Masorpa npc.
 
-2. If you have recently zoned into Mhaura you will have to wait to use the go command until your inventory loads.
+2. If you have recently zoned into Mhaura you will have to wait to use the go command until your inventory loads, or if you have only recently logged in.
 
 3. Make sure there is only one of the given cape you want to augment in your inventory. For example if you are intending to augment an ogma's cape, there should only be one ogma's cape in your inventory.
 
@@ -22,7 +22,7 @@ There are some conditions that you need to meet in order to use the important go
 
 6. If you have the inventory menu open, be sure to close it before using the go commmand and make sure you do not open menus or move items around in your inventories while the augmentation process is ongoing. You will get a start message after you use the go command and an ending message once the augmentation process completes. You can mess around with your inventory after you get the ending message, otherwise you might interrupt the augmentation process and need to reload the addon.
 
-7. There is currently a bug involving dye (maybe other paths as well) where the augmentation process will stop after augmenting a cape with dye for the first time. Try using //ct go 1 to avoid the augmentation process getting caught in limbo if you are using a dye for the first time on a cape. If the augmentation process ever seems to stop for any augment path/item combo, I recommend using the **//ct reload** command and starting the process over again.
+7. The augmentation process can occasionally stall. If this ever happens you can use the **//ct r** command to reload the addon and start the process over again.
 
 
 Suppose you want to augment an ogma's cape from scratch with dex, accuracy and attack, and double attack. You can use the following steps:
