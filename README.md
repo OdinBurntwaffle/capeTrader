@@ -8,7 +8,7 @@ Load the addon by using the following command:
 
     //lua load capetrader
 
-There are some conditions that you need to meet in order to use the important go and prep commands. Point 5 is particularly important to consider:
+There are some conditions that you need to meet in order to use the important go and prep commands: 
 
 1. You must be in Mhaura and be within a distance of 6 to the Gorpa-Masorpa npc.
 
@@ -18,7 +18,7 @@ There are some conditions that you need to meet in order to use the important go
 
 4. The go command takes a number as an input that represents the number of times you wish to augment your cape. It is possible you will lose your thread,dust,sap and dye if you enter a number that would take your augment past its possible maximum. For example suppose you have an ogma's cape already augmented with Dex+5 from a thread item. After using the **//ct prep run thread dex** command you enter **//ct go 20** command. There is a safeguard that will stop the augmentation process after augmenting your cape 15 times. However it is highly recommended that you enter the exact number of times you need to max a particular augment path just in case.
 
-5. It is also possible to lose augment items if you try to augment a cape with a different path than is already present. Suppose again you have an ogma's cape augmented with DEX+5 via threads. If you enter the **//ct prep run thread str** and then the **//ct go 15** command intending to augment your cape with str, **you will lose all 15 threads**. There is currently no safeguard for this but it is being thought about.
+5. It is also possible to lose augment items if you try to augment a cape with a different path than is already present. Suppose again you have an ogma's cape augmented with DEX+5 via threads. If you enter the **//ct prep run thread str** and then the **//ct go 15** command intending to augment your cape with str, **you might lose these 15 threads**. There is now a safeguard to avoid this, but it has not been tested for every single augment path. It is highly recommended you make sure your intended augment path already matches what is on the cape.
 
 6. If you have the inventory menu open, be sure to close it before using the go commmand and make sure you do not open menus or move items around in your inventories while the augmentation process is ongoing. You will get a start message after you use the go command and an ending message once the augmentation process completes. You can mess around with your inventory after you get the ending message, otherwise you might interrupt the augmentation process and need to reload the addon.
 
