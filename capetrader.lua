@@ -101,9 +101,6 @@ windower.register_event('addon command', function(input, ...)
 		printAugList()
 	elseif cmd == 'help' or cmd == 'h' then
 		printHelp()
-	elseif cmd == 'test' or cmd == 't' then
-		inventory = windower.ffxi.get_items(INVENTORY_BAG_NUMBER)
-		checkAugLimits()
 	elseif cmd == 'unload' or cmd == 'u' then
 		windower.send_command('lua unload ' .. _addon.name)
 	elseif cmd == 'reload' or cmd == 'r' then
