@@ -29,7 +29,6 @@ _addon.author = 'Lygre, Burntwaffle'
 _addon.version = '1.0.2'
 _addon.commands = {'capetrader', 'ct'}
 
---TODO:Add safeguards for trying to augment a cape with a non matching augment path. For example attempting to augment a cape with str when it already has dex
 --TODO:Try to fix the bug where upon using a dye for the first time the augmentation process stops after one trade. A longer trade delay might fix this.
 
 require('luau')
@@ -102,6 +101,9 @@ windower.register_event('addon command', function(input, ...)
 		printAugList()
 	elseif cmd == 'help' or cmd == 'h' then
 		printHelp()
+	elseif cmd == 'test' or cmd == 't' then
+		inventory = windower.ffxi.get_items(INVENTORY_BAG_NUMBER)
+		checkAugLimits()
 	elseif cmd == 'unload' or cmd == 'u' then
 		windower.send_command('lua unload ' .. _addon.name)
 	elseif cmd == 'reload' or cmd == 'r' then
@@ -370,7 +372,7 @@ function startAugmentingCape(numberOfRepeats, firstAttempt)
 		augStatus = checkAugLimits()
 	end
 	if safeToAugment and not busy and firstAttempt and augStatus then
-		if capeCountsafe and checkThreadDustDyeSapCount(path_item, numberOfRepeats) and checkDistanceToNPC() and string.lower(augStatus) ~= 'maxed' then
+		if capeCountsafe and checkThreadDustDyeSapCount(path_item, numberOfRepeats) and checkDistanceToNPC() and string.lower(augStatus) ~= 'maxed' and string.lower(augStatus) ~= 'notmatching' then
 			if firstPass then
 				if string.lower(augStatus) ~= 'empty' then
 					firstTimeAug = false
@@ -430,7 +432,6 @@ function checkAugLimits()
 	end
 
 	local capeItem
-
 	for index, item in pairs(inventory) do
 		if index ~= 'max' and index ~= 'count' and index ~= 'enabled' then
 			if item.id == capeID then
@@ -463,13 +464,29 @@ function checkAugLimits()
 		return 'empty'
 	end
 
-	local max = maxAugMap[maxAugKey]
+	local max = maxAugMap[maxAugKey].max
 	if string.contains(augValue, max) then
 		windower.add_to_chat(123, 'You have augmented your ' .. cape_name .. ' to the max already with abdhaljs ' .. path_item .. '.')
 		return 'maxed'
 	end
 
-	--TODO:Check for non matching augment paths
+	local mustContainTable = maxAugMap[maxAugKey].mustcontain
+	for k, augmentString in pairs(mustContainTable) do
+		if not string.contains(string.lower(augValue), string.lower(augmentString)) then
+			windower.add_to_chat(123,'You can\'t augment your ' .. cape_name .. ' with ' .. pathName .. ' because it has already been augmented with: ' .. augValue .. ' using ' .. path_item .. '.')
+			return 'notmatching'
+		end
+	end
+
+	local cantContainTable = maxAugMap[maxAugKey].cantcontain
+	if table.length(cantContainTable) > 0 then
+		for k, augmentString in pairs(cantContainTable) do
+			if string.contains(string.lower(augValue), string.lower(augmentString)) then
+				windower.add_to_chat(123,'You can\'t augment your ' .. cape_name .. 'with ' .. pathName .. ' because it has already been augmented with: ' .. augValue .. ' using ' .. path_item .. '.')
+				return 'notmatching'
+			end
+		end
+	end
 
 	return 'allclear'
 end
