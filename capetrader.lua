@@ -29,8 +29,6 @@ _addon.author = 'Lygre, Burntwaffle'
 _addon.version = '1.0.2'
 _addon.commands = {'capetrader', 'ct'}
 
---TODO:Try to fix the bug where upon using a dye for the first time the augmentation process stops after one trade. A longer trade delay might fix this.
-
 require('luau')
 require('pack')
 require('sets')
@@ -189,7 +187,7 @@ windower.register_event('incoming chunk', function(id, data, modified, injected,
 			if path_item ~= 'dye' then
 				functions.schedule(startAugmentingCape, TRADE_DELAY, numberOfTimesToAugment - timesAugmentedCount + 1, false)
 			else
-				functions.schedule(startAugmentingCape, TRADE_DELAY_DYE, numberOfTimesToAugment - timesAugmentedCount + 1, false)--TODO:I don't know if this will fix the dye bug described in the readme.
+				functions.schedule(startAugmentingCape, TRADE_DELAY_DYE, numberOfTimesToAugment - timesAugmentedCount + 1, false)
 			end
 		end
 	end
@@ -197,7 +195,7 @@ end)
 
 function checkDistanceToNPC()
 	local zoneID = tonumber(windower.ffxi.get_info().zone)
-	if zoneID == zone then --Mhaura zoneID is 249
+	if zoneID == zone then
 		local target = windower.ffxi.get_mob_by_id(npc)
 		if target and math.sqrt(target.distance) < 6 then
 			return true
@@ -217,7 +215,7 @@ function checkThreadDustDyeSapCount(augmentType, numberOfAugmentAttempts)
 		local augID = augItem.id
 		local augItemCount = 0
 
-		for key, itemTable in pairs(inventory) do --0 is inventory bag id
+		for key, itemTable in pairs(inventory) do
 			if key ~= 'max' and key ~= 'count' and key ~= 'enabled' then
 				local itemID = itemTable.id
 				if itemID == augID then
@@ -254,8 +252,6 @@ function checkThreadDustDyeSapCount(augmentType, numberOfAugmentAttempts)
 
 end
 
-
---Make sure there is only one cape currently in inventory.
 function checkCapeCount()
 	local capeCount = 0
 	local capeID
@@ -291,7 +287,6 @@ function checkCapeCount()
 			return true
 		end
 	else
-		-- windower.add_to_chat(123,'You have not yet specified a cape to augment, please use the //ct prep command first.')
 		return false
 	end
 end
