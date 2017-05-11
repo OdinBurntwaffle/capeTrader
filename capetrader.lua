@@ -51,9 +51,9 @@ local cape_name = ""
 local pathName = nil
 local opt_ind
 local path_item = ''
-local INVENTORY_BAG_NUMBER = 0
-local MAX_AMOUNT_DUST_THREAD = 20
-local MAX_AMOUNT_SAP_DYE = 10
+local inventoryBagNumber = 0
+local maxAmountDustAndThread = 20
+local maxAmountSapAndDye = 10
 local cape_ind
 local aug_ind
 local safeToAugment = false
@@ -61,13 +61,13 @@ local busy = false
 local timesAugmentedCount = nil
 local numberOfTimesToAugment = nil
 local firstPass = false
-local TRADE_DELAY = 1
-local TRADE_DELAY_DYE = 2
+local dustSapThreadTradeDelay = 1
+local dyeTradeDelay = 2
 local tradeReady = false
-local THREAD_INDEX = 1
-local DUST_INDEX = 2
-local DYE_INDEX = 3
-local SAP_INDEX = 4
+local threadIndex = 1
+local dustIndex = 2
+local dyeIndex = 3
+local sapIndex = 4
 local maxAugKey = nil
 local zoneHasLoaded = true
 local inventory = nil
@@ -82,7 +82,7 @@ windower.register_event('addon command', function(input, ...)
 		end
 	elseif cmd == 'go' then
 		if zoneHasLoaded then
-			inventory = windower.ffxi.get_items(INVENTORY_BAG_NUMBER)
+			inventory = windower.ffxi.get_items(inventoryBagNumber)
 			if arg[1] then
 				if tonumber(arg[1]) then
 					startAugmentingCape(arg[1], true)
@@ -185,9 +185,9 @@ windower.register_event('incoming chunk', function(id, data, modified, injected,
 			tradeReady = false
 
 			if path_item ~= 'dye' then
-				functions.schedule(startAugmentingCape, TRADE_DELAY, numberOfTimesToAugment - timesAugmentedCount + 1, false)
+				functions.schedule(startAugmentingCape, dustSapThreadTradeDelay, numberOfTimesToAugment - timesAugmentedCount + 1, false)
 			else
-				functions.schedule(startAugmentingCape, TRADE_DELAY_DYE, numberOfTimesToAugment - timesAugmentedCount + 1, false)
+				functions.schedule(startAugmentingCape, dyeTradeDelay, numberOfTimesToAugment - timesAugmentedCount + 1, false)
 			end
 		end
 	end
@@ -227,11 +227,11 @@ function checkThreadDustDyeSapCount(augmentType, numberOfAugmentAttempts)
 		if tonumber(numberOfAugmentAttempts) < 1 then
 			windower.add_to_chat(123, 'Please enter a number of 1 or greater.')
 			return false
-		elseif tonumber(numberOfAugmentAttempts) > MAX_AMOUNT_SAP_DYE and (path_item == 'dye' or path_item == 'sap') then
-			windower.add_to_chat(123, 'For sap or dye, the max number of times you can augment a cape is ' .. MAX_AMOUNT_SAP_DYE .. ' times. You entered: ' .. numberOfAugmentAttempts)
+		elseif tonumber(numberOfAugmentAttempts) > maxAmountSapAndDye and (path_item == 'dye' or path_item == 'sap') then
+			windower.add_to_chat(123, 'For sap or dye, the max number of times you can augment a cape is ' .. maxAmountSapAndDye .. ' times. You entered: ' .. numberOfAugmentAttempts)
 			return false
-		elseif tonumber(numberOfAugmentAttempts) > MAX_AMOUNT_DUST_THREAD and (path_item == 'dust' or path_item == 'thread') then
-			windower.add_to_chat(123, 'For dust or thread, the max number of times you can augment a cape is ' .. MAX_AMOUNT_DUST_THREAD .. ' times. You entered: ' .. numberOfAugmentAttempts)
+		elseif tonumber(numberOfAugmentAttempts) > maxAmountDustAndThread and (path_item == 'dust' or path_item == 'thread') then
+			windower.add_to_chat(123, 'For dust or thread, the max number of times you can augment a cape is ' .. maxAmountDustAndThread .. ' times. You entered: ' .. numberOfAugmentAttempts)
 			return false
 		elseif tonumber(numberOfAugmentAttempts) > augItemCount then
 			local temp
@@ -440,13 +440,13 @@ function checkAugLimits()
 	local augValue
 	if augmentTable then
 		if path_item == 'thread' then
-			augValue = augmentTable[THREAD_INDEX]
+			augValue = augmentTable[threadIndex]
 		elseif path_item == 'dust' then
-			augValue = augmentTable[DUST_INDEX]
+			augValue = augmentTable[dustIndex]
 		elseif path_item == 'dye' then
-			augValue = augmentTable[DYE_INDEX]
+			augValue = augmentTable[dyeIndex]
 		elseif path_item == 'sap' then
-			augValue = augmentTable[SAP_INDEX]
+			augValue = augmentTable[sapIndex]
 		end
 	else
 		augValue = 'none'
