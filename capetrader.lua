@@ -81,7 +81,6 @@ windower.register_event('addon command', function(input, ...)
 		end
 	elseif cmd == 'go' then
 		if zoneHasLoaded and not currentlyAugmenting then
-			inventory = windower.ffxi.get_items(inventoryBagNumber)
 			if arg[1] then
 				if tonumber(arg[1]) then
 					startAugmentingCape(arg[1], true)
@@ -202,6 +201,7 @@ function checkDistanceToNPC()
 		end
 	else
 		windower.add_to_chat(123, "You are not in Mhaura!")
+		currentlyAugmenting = false
 		return false
 	end
 end
@@ -234,16 +234,18 @@ function checkThreadDustDyeSapCount(numberOfAugmentAttempts)
 			elseif tonumber(numberOfAugmentAttempts) == 1 then
 				temp = ' time.'
 			end
-			windower.add_to_chat(123, 'You do not have enough ' .. augItem.en .. ' to augment that cape ' .. numberOfAugmentAttempts .. temp ..' You only have ' .. pathItemCount .. ' in your inventory.')
+
+			if pathItemCount ~= 0 then
+				windower.add_to_chat(123, 'You do not have enough ' .. pathItem.en .. ' to augment that cape ' .. numberOfAugmentAttempts .. temp ..' You only have ' .. pathItemCount .. ' in your inventory.')
+			else
+				windower.add_to_chat(123, 'You do not have enough ' .. pathItem.en .. ' to augment that cape ' .. numberOfAugmentAttempts .. temp ..' You have none in your inventory.')
+			end
 			return false
 		else
 			augmentItemIndex = getAugItemIndex()
 			return true
 		end
-	else
-		windower.add_to_chat(158, 'Error with input augmentType in checkThreadDustDyeSapCount function.')
 	end
-
 end
 
 function checkCapeCount()
@@ -286,10 +288,8 @@ function prepareCapeForAugments(augItemType, jobName, augPath)
 			augItemTypeIsValid = true
 		end
 
-		local isCapeTypeValid = false
 		if jobToCapeMap[jobName] then
 			currentCape = getItem(jobToCapeMap[jobName])
-			isCapeTypeValid = true
 		else
 			windower.add_to_chat(123, 'The job name you entered is not valid. You entered: ' .. jobName)
 			validArguments = false
@@ -328,6 +328,7 @@ function prepareCapeForAugments(augItemType, jobName, augPath)
 end
 
 function startAugmentingCape(numberOfRepeats, firstAttempt)
+	inventory = windower.ffxi.get_items(inventoryBagNumber)
 	currentlyAugmenting = true
 	local augStatus = nil
 	local capeCountsafe = checkCapeCount()
@@ -360,11 +361,9 @@ function startAugmentingCape(numberOfRepeats, firstAttempt)
 			currentlyAugmenting = false
 			tradeReady = false
 			playerIndex = nil
-			currentCape = nil
-			pathItem = nil
 		end
 	elseif not firstAttempt and augStatus then
-		if augStatus ~= 'maxed' then
+		if augStatus and augStatus ~= 'maxed' then
 			tradeReady = false
 			build_trade()
 		else
@@ -379,6 +378,8 @@ function startAugmentingCape(numberOfRepeats, firstAttempt)
 	elseif not capeHasBeenPrepared then
 		currentlyAugmenting = false
 		windower.add_to_chat(123, 'You have not yet setup your cape and augment information with the //ct prep command!')
+	else
+		currentlyAugmenting = false
 	end
 end
 
