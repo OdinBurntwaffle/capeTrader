@@ -29,6 +29,13 @@ _addon.author = 'Lygre, Burntwaffle'
 _addon.version = '1.0.2'
 _addon.commands = {'capetrader', 'ct'}
 
+--NOTE: It is possible that the correct values for the following four variables can change after a version update.
+--NOTE: To maintain this addon these values might need to be updated after any version update.
+local gorpaID = 0x010F9099
+local mhauraID = 0x0F9
+local gorpaTargetIndex = 0x099
+local gorpaMenuID = 0x183
+
 require('luau')
 require('pack')
 require('sets')
@@ -42,10 +49,6 @@ local extData = require('extdata')
 local jobToCapeMap = require('jobToCapeMap')
 
 local playerIndex = nil
-local gorpaID = 17797273
-local gorpaTargetIndex = 153
-local gorpaMenuID = 387
-local mhauraID = 249
 local currentCape
 local pathName = nil
 local pathIndex
@@ -73,17 +76,18 @@ local inventory = nil
 
 windower.register_event('addon command', function(input, ...)
     local cmd = string.lower(input)
+    local args = {...}
     if cmd == 'prep' then
-        if arg[1] and arg[2] and arg[3] then
-            prepareCapeForAugments(arg[2], arg[1], arg[3])
+        if args[1] and args[2] and args[3] then
+            prepareCapeForAugments(args[2], args[1], args[3])
         else
             windower.add_to_chat(123, "You are missing at least one input to the prep command.")
         end
     elseif cmd == 'go' then
         if zoneHasLoaded and not currentlyAugmenting then
-            if arg[1] then
-                if tonumber(arg[1]) then
-                    startAugmentingCape(arg[1], true)
+            if args[1] then
+                if tonumber(args[1]) then
+                    startAugmentingCape(args[1], true)
                 else
                     windower.add_to_chat(123, 'Error: Not given a numerical argument.')
                 end
@@ -454,24 +458,23 @@ function injectAugmentConfirmationPackets()
         optionIndex = 256
     end
 
-    local packet = packets.new('outgoing', 0x05B)
-    packet["Target"] = gorpaID
-    packet["Option Index"] = optionIndex
-    packet["_unknown1"] = pathIndex
-    packet["Target Index"] = gorpaTargetIndex
-    packet["Automated Message"] = true
-    packet["_unknown2"] = 0
-    packet["Zone"] = mhauraID
-    packet["Menu ID"] = gorpaMenuID
-    packets.inject(packet)
+    local augmentChoicePacket = packets.new('outgoing', 0x05B)
+    augmentChoicePacket["Target"] = gorpaID
+    augmentChoicePacket["Option Index"] = optionIndex
+    augmentChoicePacket["_unknown1"] = pathIndex
+    augmentChoicePacket["Target Index"] = gorpaTargetIndex
+    augmentChoicePacket["Automated Message"] = true
+    augmentChoicePacket["Zone"] = mhauraID
+    augmentChoicePacket["Menu ID"] = gorpaMenuID
+    packets.inject(augmentChoicePacket)
 
-    packet["Automated Message"] = false
-    packets.inject(packet)
+    augmentChoicePacket["Automated Message"] = false
+    packets.inject(augmentChoicePacket)
 
-    packet = packets.new('outgoing', 0x016, {
+    local playerUpdatePacket = packets.new('outgoing', 0x016, {
         ["Target Index"] = playerIndex,
     })
-    packets.inject(packet)
+    packets.inject(playerUpdatePacket)
 end
 
 function sendCompletedMessage()
