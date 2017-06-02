@@ -126,7 +126,7 @@ end
 
 function getItem(itemName)
     for k, item in pairs(res.items) do
-        if string.lower(item.en) == string.lower(itemName) then
+        if string.lower(item.name) == string.lower(itemName) then
             return item
         end
     end
@@ -180,7 +180,7 @@ windower.register_event('incoming chunk', function(id, data, modified, injected,
         if tradeReady then
             tradeReady = false
 
-            if not string.contains(string.lower(pathItem.en), 'dye') then
+            if not string.contains(string.lower(pathItem.name), 'dye') then
                 functions.schedule(startAugmentingCape, dustSapThreadTradeDelay, numberOfTimesToAugment - timesAugmentedCount + 1, false)
             else
                 functions.schedule(startAugmentingCape, dyeTradeDelay, numberOfTimesToAugment - timesAugmentedCount + 1, false)
@@ -221,10 +221,10 @@ function checkThreadDustDyeSapCount(numberOfAugmentAttempts)
         if tonumber(numberOfAugmentAttempts) < 1 then
             windower.add_to_chat(123, 'Please enter a number of 1 or greater.')
             return false
-        elseif tonumber(numberOfAugmentAttempts) > maxAmountSapAndDye and (string.contains(string.lower(pathItem.en), 'dye') or (string.contains(string.lower(pathItem.en), 'sap'))) then
+        elseif tonumber(numberOfAugmentAttempts) > maxAmountSapAndDye and (string.contains(string.lower(pathItem.name), 'dye') or (string.contains(string.lower(pathItem.name), 'sap'))) then
             windower.add_to_chat(123, 'For sap or dye, the max number of times you can augment a cape is ' .. maxAmountSapAndDye .. ' times. You entered: ' .. numberOfAugmentAttempts)
             return false
-        elseif tonumber(numberOfAugmentAttempts) > maxAmountDustAndThread and (string.contains(string.lower(pathItem.en), 'dust') or (string.contains(string.lower(pathItem.en), 'thread'))) then
+        elseif tonumber(numberOfAugmentAttempts) > maxAmountDustAndThread and (string.contains(string.lower(pathItem.name), 'dust') or (string.contains(string.lower(pathItem.name), 'thread'))) then
             windower.add_to_chat(123, 'For dust or thread, the max number of times you can augment a cape is ' .. maxAmountDustAndThread .. ' times. You entered: ' .. numberOfAugmentAttempts)
             return false
         elseif tonumber(numberOfAugmentAttempts) > pathItemCount then
@@ -236,9 +236,9 @@ function checkThreadDustDyeSapCount(numberOfAugmentAttempts)
             end
 
             if pathItemCount ~= 0 then
-                windower.add_to_chat(123, 'You do not have enough ' .. pathItem.en .. ' to augment that cape ' .. numberOfAugmentAttempts .. temp ..' You only have ' .. pathItemCount .. ' in your inventory.')
+                windower.add_to_chat(123, 'You do not have enough ' .. pathItem.name .. ' to augment that cape ' .. numberOfAugmentAttempts .. temp ..' You only have ' .. pathItemCount .. ' in your inventory.')
             else
-                windower.add_to_chat(123, 'You do not have enough ' .. pathItem.en .. ' to augment that cape ' .. numberOfAugmentAttempts .. temp ..' You have none in your inventory.')
+                windower.add_to_chat(123, 'You do not have enough ' .. pathItem.name .. ' to augment that cape ' .. numberOfAugmentAttempts .. temp ..' You have none in your inventory.')
             end
             return false
         else
@@ -261,10 +261,10 @@ function checkCapeCount()
         end
 
         if capeCount > 1 then
-            windower.add_to_chat(123, 'You have multiple ' .. currentCape.en .. 's in your inventory! Please keep only the one you intend to augment in your inventory.')
+            windower.add_to_chat(123, 'You have multiple ' .. currentCape.name .. 's in your inventory! Please keep only the one you intend to augment in your inventory.')
             return false
         elseif capeCount == 0 then
-            windower.add_to_chat(123, 'You have zero ' .. currentCape.en .. 's in your inventory. Please find the one you intend to augment and move it to your inventory.')
+            windower.add_to_chat(123, 'You have zero ' .. currentCape.name .. 's in your inventory. Please find the one you intend to augment and move it to your inventory.')
             return false
         elseif capeCount == 1 then
             capeIndex = getCapeIndex()
@@ -297,7 +297,7 @@ function prepareCapeForAugments(augItemType, jobName, augPath)
 
         if augPath and augItemTypeIsValid and validArguments then
             local isValidPath = false
-            for i, v in pairs(augPaths[string.lower(pathItem.en)]) do
+            for i, v in pairs(augPaths[string.lower(pathItem.name)]) do
                 if augPath:lower() == v:lower() then
                     pathIndex = i
                     pathName = augPath
@@ -352,7 +352,7 @@ function startAugmentingCape(numberOfRepeats, firstAttempt)
             end
 
             numberOfTimesToAugment = numberOfRepeats
-            windower.add_to_chat(466, 'Starting to augment your ' .. currentCape.en .. ' ' .. numberOfRepeats .. ' ' .. temp)
+            windower.add_to_chat(466, 'Starting to augment your ' .. currentCape.name .. ' ' .. numberOfRepeats .. ' ' .. temp)
 
             playerIndex = windower.ffxi.get_mob_by_target('me').index
             tradeReady = false
@@ -401,13 +401,13 @@ function checkAugLimits()
 
     local augValue
     if augmentTable then
-        if string.contains(string.lower(pathItem.en), 'thread') then
+        if string.contains(string.lower(pathItem.name), 'thread') then
             augValue = augmentTable[threadIndex]
-        elseif string.contains(string.lower(pathItem.en),'dust') then
+        elseif string.contains(string.lower(pathItem.name),'dust') then
             augValue = augmentTable[dustIndex]
-        elseif string.contains(string.lower(pathItem.en), 'dye') then
+        elseif string.contains(string.lower(pathItem.name), 'dye') then
             augValue = augmentTable[dyeIndex]
-        elseif string.contains(string.lower(pathItem.en), 'sap') then
+        elseif string.contains(string.lower(pathItem.name), 'sap') then
             augValue = augmentTable[sapIndex]
         end
     else
@@ -420,14 +420,14 @@ function checkAugLimits()
 
     local max = maxAugMap[maxAugKey].max
     if string.contains(augValue, max) then
-        windower.add_to_chat(123, 'You have augmented your ' .. currentCape.en .. ' to the max already with ' .. pathItem.en .. '.')
+        windower.add_to_chat(123, 'You have augmented your ' .. currentCape.name .. ' to the max already with ' .. pathItem.name .. '.')
         return 'maxed'
     end
 
     local mustContainTable = maxAugMap[maxAugKey].mustcontain
     for k, augmentString in pairs(mustContainTable) do
         if not string.contains(string.lower(augValue), string.lower(augmentString)) then
-            windower.add_to_chat(123,'You can\'t augment your ' .. currentCape.en .. ' with ' .. pathName .. ' because it has already been augmented with: ' .. augValue .. ' using ' .. pathItem.en .. '.')
+            windower.add_to_chat(123,'You can\'t augment your ' .. currentCape.name .. ' with ' .. pathName .. ' because it has already been augmented with: ' .. augValue .. ' using ' .. pathItem.name .. '.')
             return 'notmatching'
         end
     end
@@ -436,7 +436,7 @@ function checkAugLimits()
     if table.length(cantContainTable) > 0 then
         for k, augmentString in pairs(cantContainTable) do
             if string.contains(string.lower(augValue), string.lower(augmentString)) then
-                windower.add_to_chat(123,'You can\'t augment your ' .. currentCape.en .. 'with ' .. pathName .. ' because it has already been augmented with: ' .. augValue .. ' using ' .. pathItem.en .. '.')
+                windower.add_to_chat(123,'You can\'t augment your ' .. currentCape.name .. 'with ' .. pathName .. ' because it has already been augmented with: ' .. augValue .. ' using ' .. pathItem.name .. '.')
                 return 'notmatching'
             end
         end
