@@ -30,11 +30,21 @@ _addon.version = '1.0.2'
 _addon.commands = {'capetrader', 'ct'}
 
 --NOTE: It is possible that the correct values for the following four variables can change after a version update.
---NOTE: To maintain this addon these values might need to be updated after any version update.
 local gorpaID = 0x010F9099
 local mhauraID = 0x0F9
 local gorpaTargetIndex = 0x099
 local gorpaMenuID = 0x183
+--NOTE: To maintain this addon these values might need to be updated after any version update.
+--NOTE: If an update to these variables is necessary you can follow the following steps to find their correct values:
+--[[
+    1. Uncomment the line involving the function call to printGorpaPacketInfo in the register_event('outgoing chunk' code block.
+    2. Reload the capetrader addon.
+    3. Trade a cape and one of a abdhaljs dye/thread/dust/sap to Gorpa-Masorpa.
+    4. If the cape has been augmented before you can choose the "Think about it some more" dialog option. This is also the option to choose if the traded cape has already been maxed out in that augment path.
+    5. If the cape has NOT been augmented before you can choose the "Nothing for now" dialog option.
+    6. The correct values for these variables should be printed out in your ffxi chatbox. You can copy these values down and replace the four variables if necessary.
+    7. Comment out the line where printGorpaPacketInfo is called and reload the addon.
+]]
 
 require('luau')
 require('pack')
@@ -48,14 +58,13 @@ local maxAugMap = require('maxAugMap')
 local extData = require('extdata')
 local jobToCapeMap = require('jobToCapeMap')
 
+--The following variables need to be carefully tracked and updated throughout all parts of this file.
+--TODO: Find ways to reduce the amount of global variables in this list
 local playerIndex = nil
 local currentCape
 local pathName = nil
 local pathIndex
 local pathItem = nil
-local inventoryBagNumber = 0
-local maxAmountDustAndThread = 20
-local maxAmountSapAndDye = 10
 local capeIndex
 local augmentItemIndex
 local capeHasBeenPrepared = false
@@ -63,25 +72,34 @@ local currentlyAugmenting = false
 local firstTimeAug = false
 local timesAugmentedCount = 0
 local numberOfTimesToAugment = 0
-local dustSapThreadTradeDelay = 1
-local dyeTradeDelay = 2
 local tradeReady = false
-local threadIndex = 1
-local dustIndex = 2
-local dyeIndex = 3
-local sapIndex = 4
 local maxAugKey = nil
 local zoneHasLoaded = true
 local inventory = nil
 
+--The following are constants.
+local dustSapThreadTradeDelay = 1
+local dyeTradeDelay = 2
+local endMessageDelay = 2
+local threadIndex = 1
+local dustIndex = 2
+local dyeIndex = 3
+local sapIndex = 4
+local inventoryBagNumber = 0
+local maxAmountDustAndThread = 20
+local maxAmountSapAndDye = 10
+local blueTextColor = 466
+local redTextColor = 123
+local greenTextColor = 158
+
 windower.register_event('addon command', function(input, ...)
-    local cmd = input:lower()
+    local cmd = string.lower(input)
     local args = {...}
     if cmd == 'prep' then
         if args[1] and args[2] and args[3] then
             prepareCapeForAugments(args[2], args[1], args[3])
         else
-            windower.add_to_chat(123, "You are missing at least one input to the prep command.")
+            windower.add_to_chat(redTextColor, "You are missing at least one input to the prep command.")
         end
     elseif cmd == 'go' then
         if zoneHasLoaded and not currentlyAugmenting then
@@ -89,15 +107,15 @@ windower.register_event('addon command', function(input, ...)
                 if tonumber(args[1]) then
                     startAugmentingCape(args[1], true)
                 else
-                    windower.add_to_chat(123, 'Error: Not given a numerical argument.')
+                    windower.add_to_chat(redTextColor, 'Error: Not given a numerical argument.')
                 end
             else
                 startAugmentingCape(1, true)
             end
         elseif not zoneHasLoaded then
-            windower.add_to_chat(123, 'Your inventory has not yet loaded, please try the go command again when your inventory loads.')
+            windower.add_to_chat(redTextColor, 'Your inventory has not yet loaded, please try the go command again when your inventory loads.')
         elseif currentlyAugmenting then
-            windower.add_to_chat(123, 'You are currently still augmenting a cape, please wait until the process finishes.')
+            windower.add_to_chat(redTextColor, 'You are currently still augmenting a cape, please wait until the process finishes.')
         end
     elseif cmd == 'list' or cmd == 'l' then
         printAugList()
@@ -108,7 +126,7 @@ windower.register_event('addon command', function(input, ...)
     elseif cmd == 'reload' or cmd == 'r' then
         windower.send_command('lua reload ' .. _addon.name)
     else
-        windower.add_to_chat(123, 'You entered an unknown command, enter //ct help if you forget your commands.')
+        windower.add_to_chat(redTextColor, 'You entered an unknown command, enter //ct help if you forget your commands.')
     end
 end)
 
@@ -161,7 +179,7 @@ windower.register_event('incoming chunk', function(id, data, modified, injected,
 
             timesAugmentedCount = timesAugmentedCount + 1
             if timesAugmentedCount <= tonumber(numberOfTimesToAugment) then
-                windower.add_to_chat(158, timesAugmentedCount - 1 .. '/' .. numberOfTimesToAugment .. ' augments completed.')
+                windower.add_to_chat(greenTextColor, timesAugmentedCount - 1 .. '/' .. numberOfTimesToAugment .. ' augments completed.')
                 tradeReady = true
             else
                 capeHasBeenPrepared = false
@@ -170,7 +188,7 @@ windower.register_event('incoming chunk', function(id, data, modified, injected,
                 currentCape = nil
                 pathItem = nil
                 tradeReady = false
-                sendCompletedMessage:schedule(2)
+                windower.add_to_chat:schedule(endMessageDelay,blueTextColor,'You have finished augmenting your cape.')
             end
 
             return true
@@ -193,18 +211,29 @@ windower.register_event('incoming chunk', function(id, data, modified, injected,
     end
 end)
 
+windower.register_event('outgoing chunk',function(id,data)
+    if id == 0x05B then
+        local dialogChoicePacket = packets.parse('outgoing',data)
+        if dialogChoicePacket['Automated Message'] then
+            --NOTE: Uncomment the following printGorpaPacketInfo call if you suspect gorpa information needs to be updated.
+            --NOTE: Comment out the line if you have successfully updated the gorpa information variables.
+            -- printGorpaPacketInfo(dialogChoicePacket)
+        end
+    end
+end)
+
 function checkDistanceToNPC()
     local zoneID = tonumber(windower.ffxi.get_info().zone)
     if zoneID == mhauraID then
         local target = windower.ffxi.get_mob_by_id(gorpaID)
-        if target and math.sqrt(target.distance) < 6 then
+        if target and target.distance < 36 then
             return true
         else
-            windower.add_to_chat(123, "You're not close enough to Gorpa-Masorpa, please get closer!")
+            windower.add_to_chat(redTextColor, "You're not close enough to Gorpa-Masorpa, please get closer!")
             return false
         end
     else
-        windower.add_to_chat(123, "You are not in Mhaura!")
+        windower.add_to_chat(redTextColor, "You are not in Mhaura!")
         currentlyAugmenting = false
         return false
     end
@@ -223,13 +252,13 @@ function checkThreadDustDyeSapCount(numberOfAugmentAttempts)
         end
 
         if tonumber(numberOfAugmentAttempts) < 1 then
-            windower.add_to_chat(123, 'Please enter a number of 1 or greater.')
+            windower.add_to_chat(redTextColor, 'Please enter a number of 1 or greater.')
             return false
         elseif tonumber(numberOfAugmentAttempts) > maxAmountSapAndDye and (pathItem.name:lower():endswith(' dye') or pathItem.name:lower():endswith(' sap')) then
-            windower.add_to_chat(123, 'For sap or dye, the max number of times you can augment a cape is ' .. maxAmountSapAndDye .. ' times. You entered: ' .. numberOfAugmentAttempts)
+            windower.add_to_chat(redTextColor, 'For sap or dye, the max number of times you can augment a cape is ' .. maxAmountSapAndDye .. ' times. You entered: ' .. numberOfAugmentAttempts)
             return false
         elseif tonumber(numberOfAugmentAttempts) > maxAmountDustAndThread and (pathItem.name:lower():endswith(' dust') or pathItem.name:lower():endswith(' thread')) then
-            windower.add_to_chat(123, 'For dust or thread, the max number of times you can augment a cape is ' .. maxAmountDustAndThread .. ' times. You entered: ' .. numberOfAugmentAttempts)
+            windower.add_to_chat(redTextColor, 'For dust or thread, the max number of times you can augment a cape is ' .. maxAmountDustAndThread .. ' times. You entered: ' .. numberOfAugmentAttempts)
             return false
         elseif tonumber(numberOfAugmentAttempts) > pathItemCount then
             local temp
@@ -240,9 +269,9 @@ function checkThreadDustDyeSapCount(numberOfAugmentAttempts)
             end
 
             if pathItemCount ~= 0 then
-                windower.add_to_chat(123, 'You do not have enough ' .. pathItem.name .. ' to augment that cape ' .. numberOfAugmentAttempts .. temp ..' You only have ' .. pathItemCount .. ' in your inventory.')
+                windower.add_to_chat(redTextColor, 'You do not have enough ' .. pathItem.name .. ' to augment that cape ' .. numberOfAugmentAttempts .. temp ..' You only have ' .. pathItemCount .. ' in your inventory.')
             else
-                windower.add_to_chat(123, 'You do not have enough ' .. pathItem.name .. ' to augment that cape ' .. numberOfAugmentAttempts .. temp ..' You have none in your inventory.')
+                windower.add_to_chat(redTextColor, 'You do not have enough ' .. pathItem.name .. ' to augment that cape ' .. numberOfAugmentAttempts .. temp ..' You have none in your inventory.')
             end
             return false
         else
@@ -265,10 +294,10 @@ function checkCapeCount()
         end
 
         if capeCount > 1 then
-            windower.add_to_chat(123, 'You have multiple ' .. currentCape.name .. 's in your inventory! Please keep only the one you intend to augment in your inventory.')
+            windower.add_to_chat(redTextColor, 'You have multiple ' .. currentCape.name .. 's in your inventory! Please keep only the one you intend to augment in your inventory.')
             return false
         elseif capeCount == 0 then
-            windower.add_to_chat(123, 'You have zero ' .. currentCape.name .. 's in your inventory. Please find the one you intend to augment and move it to your inventory.')
+            windower.add_to_chat(redTextColor, 'You have zero ' .. currentCape.name .. 's in your inventory. Please find the one you intend to augment and move it to your inventory.')
             return false
         elseif capeCount == 1 then
             capeIndex = getCapeIndex()
@@ -285,7 +314,7 @@ function prepareCapeForAugments(augItemType, jobName, augPath)
         local augItemTypeIsValid = false
 
         if not S{'sap', 'dye', 'thread', 'dust'}:contains(augItemType:lower()) then
-            windower.add_to_chat(123, 'Error with the type of augment item you entered. The second input should be sap or dye or thread or dust. You entered: ' .. augItemType:lower())
+            windower.add_to_chat(redTextColor, 'Error with the type of augment item you entered. The second input should be sap or dye or thread or dust. You entered: ' .. augItemType:lower())
             validArguments = false
         else
             pathItem = getItem('abdhaljs ' .. augItemType)
@@ -295,7 +324,7 @@ function prepareCapeForAugments(augItemType, jobName, augPath)
         if jobToCapeMap[jobName] then
             currentCape = getItem(jobToCapeMap[jobName])
         else
-            windower.add_to_chat(123, 'The job name you entered is not valid. You entered: ' .. jobName)
+            windower.add_to_chat(redTextColor, 'The job name you entered is not valid. You entered: ' .. jobName)
             validArguments = false
         end
 
@@ -311,7 +340,7 @@ function prepareCapeForAugments(augItemType, jobName, augPath)
             end
 
             if not isValidPath then
-                windower.add_to_chat(123, 'The augment path you entered is not valid. Please check the possible augment list for ' .. augItemType:lower() .. ' using the //ct list command. You entered: ' .. augPath)
+                windower.add_to_chat(redTextColor, 'The augment path you entered is not valid. Please check the possible augment list for ' .. augItemType:lower() .. ' using the //ct list command. You entered: ' .. augPath)
                 validArguments = false
             end
         end
@@ -320,14 +349,14 @@ function prepareCapeForAugments(augItemType, jobName, augPath)
             maxAugKey = string.lower(augItemType .. augPath)
             capeHasBeenPrepared = true
             timesAugmentedCount = 1
-            windower.add_to_chat(158, 'You can now augment your ' .. jobToCapeMap[jobName] .. ' with ' .. augPath:lower() .. ' using abdhaljs ' .. augItemType:lower() .. '.')
+            windower.add_to_chat(greenTextColor, 'You can now augment your ' .. jobToCapeMap[jobName] .. ' with ' .. augPath:lower() .. ' using abdhaljs ' .. augItemType:lower() .. '.')
         else
             capeHasBeenPrepared = false
             currentCape = nil
             pathItem = nil
         end
     else
-        windower.add_to_chat(123, 'You can\'t setup another cape while you are currently augmenting one.')
+        windower.add_to_chat(redTextColor, 'You can\'t setup another cape while you are currently augmenting one.')
     end
 end
 
@@ -356,7 +385,7 @@ function startAugmentingCape(numberOfRepeats, firstAttempt)
             end
 
             numberOfTimesToAugment = numberOfRepeats
-            windower.add_to_chat(466, 'Starting to augment your ' .. currentCape.name .. ' ' .. numberOfRepeats .. ' ' .. temp)
+            windower.add_to_chat(blueTextColor, 'Starting to augment your ' .. currentCape.name .. ' ' .. numberOfRepeats .. ' ' .. temp)
 
             playerIndex = windower.ffxi.get_mob_by_target('me').index
             tradeReady = false
@@ -377,11 +406,11 @@ function startAugmentingCape(numberOfRepeats, firstAttempt)
             playerIndex = nil
             pathItem = nil
             currentCape = nil
-            windower.add_to_chat(466, 'Your cape is currently maxed in that augment path, ending the augment process now.')
+            windower.add_to_chat(blueTextColor, 'Your cape is currently maxed in that augment path, ending the augment process now.')
         end
     elseif not capeHasBeenPrepared then
         currentlyAugmenting = false
-        windower.add_to_chat(123, 'You have not yet setup your cape and augment information with the //ct prep command!')
+        windower.add_to_chat(redTextColor, 'You have not yet setup your cape and augment information with the //ct prep command!')
     else
         currentlyAugmenting = false
     end
@@ -423,15 +452,15 @@ function checkAugLimits()
     end
 
     local max = maxAugMap[maxAugKey].max
-    if augValue:endswith(max) then
-        windower.add_to_chat(123, 'You have augmented your ' .. currentCape.name .. ' to the max already with ' .. pathItem.name .. '.')
+    if augValue:contains(max) then
+        windower.add_to_chat(redTextColor, 'You have augmented your ' .. currentCape.name .. ' to the max already with ' .. pathItem.name .. '.')
         return 'maxed'
     end
 
     local mustContainTable = maxAugMap[maxAugKey].mustcontain
     for k, augmentString in pairs(mustContainTable) do
         if not augValue:lower():contains(augmentString:lower()) then
-            windower.add_to_chat(123,'You can\'t augment your ' .. currentCape.name .. ' with ' .. pathName .. ' because it has already been augmented with: ' .. augValue .. ' using ' .. pathItem.name .. '.')
+            windower.add_to_chat(redTextColor,'You can\'t augment your ' .. currentCape.name .. ' with ' .. pathName .. ' because it has already been augmented with: ' .. augValue .. ' using ' .. pathItem.name .. '.')
             return 'notmatching'
         end
     end
@@ -440,7 +469,7 @@ function checkAugLimits()
     if table.length(cantContainTable) > 0 then
         for k, augmentString in pairs(cantContainTable) do
             if augValue:lower():contains(augmentString:lower()) then
-                windower.add_to_chat(123,'You can\'t augment your ' .. currentCape.name .. 'with ' .. pathName .. ' because it has already been augmented with: ' .. augValue .. ' using ' .. pathItem.name .. '.')
+                windower.add_to_chat(redTextColor,'You can\'t augment your ' .. currentCape.name .. 'with ' .. pathName .. ' because it has already been augmented with: ' .. augValue .. ' using ' .. pathItem.name .. '.')
                 return 'notmatching'
             end
         end
@@ -477,22 +506,25 @@ function injectAugmentConfirmationPackets()
     packets.inject(playerUpdatePacket)
 end
 
-function sendCompletedMessage()
-    windower.add_to_chat(466, 'You have finished augmenting your cape.')
+function printGorpaPacketInfo(dialogChoicePacket)
+    windower.add_to_chat(blueTextColor,'gorpaID: 0x' .. string.format("%X", dialogChoicePacket['Target']))
+    windower.add_to_chat(blueTextColor,'mhauraID: 0x' .. string.format("%X", dialogChoicePacket['Zone']))
+    windower.add_to_chat(blueTextColor,'gorpaTargetIndex: 0x' .. string.format("%X", dialogChoicePacket['Target Index']))
+    windower.add_to_chat(blueTextColor,'gorpaMenuID: 0x' .. string.format("%X", dialogChoicePacket['Menu ID']))
 end
 
 function printAugList()
-    windower.add_to_chat(466, 'Thread: hp mp str dex vit agi int mnd chr petmelee petmagic')
-    windower.add_to_chat(466, 'Dust: acc/atk racc/ratk macc/mdmg eva/meva')
-    windower.add_to_chat(466, 'Sap: wsd critrate stp doubleattack haste dw enmity+ enmity- snapshot mab fc curepotency waltzpotency petregen pethaste')
-    windower.add_to_chat(466, 'Dye: hp mp str dex vit agi int mnd chr acc atk racc ratk macc mdmg eva meva petacc petatk petmacc petmdmg')
+    windower.add_to_chat(blueTextColor, 'Thread: hp mp str dex vit agi int mnd chr petmelee petmagic')
+    windower.add_to_chat(blueTextColor, 'Dust: acc/atk racc/ratk macc/mdmg eva/meva')
+    windower.add_to_chat(blueTextColor, 'Sap: wsd critrate stp doubleattack haste dw enmity+ enmity- snapshot mab fc curepotency waltzpotency petregen pethaste')
+    windower.add_to_chat(blueTextColor, 'Dye: hp mp str dex vit agi int mnd chr acc atk racc ratk macc mdmg eva meva petacc petatk petmacc petmdmg')
 end
 
 function printHelp()
-    windower.add_to_chat(466, string.format('%s Version: %s Command Listing:', _addon.name, _addon.version))
-    windower.add_to_chat(466, '   reload|r Reload CapeTrader.')
-    windower.add_to_chat(466, '   unload|u Unload CapeTrader.')
-    windower.add_to_chat(466, '   prep <jobName> <augItem> <augPath> Prepares a given job\'s cape with augItem on augPath. Need to use this before using //ct go.')
-    windower.add_to_chat(466, '   go <#repeats> Starts augmenting cape with the info gathered from the prep command. The repeats input defaults to one if not provided.')
-    windower.add_to_chat(466, '   list|l Lists all possible augitems and their valid paths. Use to know what the valid inputs for //ct prep are.')
+    windower.add_to_chat(blueTextColor, string.format('%s Version: %s Command Listing:', _addon.name, _addon.version))
+    windower.add_to_chat(blueTextColor, '   reload|r Reload CapeTrader.')
+    windower.add_to_chat(blueTextColor, '   unload|u Unload CapeTrader.')
+    windower.add_to_chat(blueTextColor, '   prep <jobName> <augItem> <augPath> Prepares a given job\'s cape with augItem on augPath. Need to use this before using //ct go.')
+    windower.add_to_chat(blueTextColor, '   go <#repeats> Starts augmenting cape with the info gathered from the prep command. The repeats input defaults to one if not provided.')
+    windower.add_to_chat(blueTextColor, '   list|l Lists all possible augitems and their valid paths. Use to know what the valid inputs for //ct prep are.')
 end
