@@ -37,13 +37,13 @@ local gorpaMenuID = 0x183
 --NOTE: To maintain this addon these values might need to be updated after any version update.
 --NOTE: If an update to these variables is necessary you can follow the following steps to find their correct values:
 --[[
-    1. Uncomment the line involving the function call to printGorpaPacketInfo in the register_event('outgoing chunk' code block.
+    1. Uncomment the line involving the function call to printGorpaPacketInfo() in the register_event('outgoing chunk' code block.
     2. Reload the capetrader addon.
     3. Trade a cape and one of a abdhaljs dye/thread/dust/sap to Gorpa-Masorpa.
-    4. If the cape has been augmented before you can choose the "Think about it some more" dialog option. This is also the option to choose if the traded cape has already been maxed out in that augment path.
-    5. If the cape has NOT been augmented before you can choose the "Nothing for now" dialog option.
-    6. The correct values for these variables should be printed out in your ffxi chatbox. You can copy these values down and replace the four variables if necessary.
-    7. Comment out the line where printGorpaPacketInfo is called and reload the addon.
+    4a. If the cape has been augmented before you can choose the "Think about it some more" dialog option. This is also the option to choose if the traded cape has already been maxed out in that augment path.
+    4b. If the cape has NOT been augmented before you can choose the "Nothing for now" dialog option.
+    5. The correct values for these variables should be printed out in your ffxi chatbox. You can copy these values down and replace the four variables if necessary.
+    6. Comment out the line where printGorpaPacketInfo() is called and reload the addon.
 ]]
 
 require('luau')
@@ -60,13 +60,10 @@ local jobToCapeMap = require('jobToCapeMap')
 
 --The following variables need to be carefully tracked and updated throughout all parts of this file.
 --TODO: Find ways to reduce the amount of global variables in this list
-local playerIndex = nil
-local currentCape
+local currentCape = nil
+local pathItem = nil
 local pathName = nil
 local pathIndex
-local pathItem = nil
-local capeIndex
-local augmentItemIndex
 local capeHasBeenPrepared = false
 local currentlyAugmenting = false
 local firstTimeAug = false
@@ -130,17 +127,9 @@ windower.register_event('addon command', function(input, ...)
     end
 end)
 
-function getCapeIndex()
+function getItemIndex(capeOrAugItem)
     for itemIndex, item in pairs(inventory) do
-        if item.id == currentCape.id then
-            return itemIndex
-        end
-    end
-end
-
-function getAugItemIndex()
-    for itemIndex, item in pairs(inventory) do
-        if item.id == pathItem.id then
+        if item.id == capeOrAugItem.id then
             return itemIndex
         end
     end
@@ -154,7 +143,7 @@ function getItem(itemName)
     end
 end
 
-function buildTrade()
+function buildTrade(capeIndex,augmentItemIndex)
     local packet = packets.new('outgoing', 0x036, {
         ["Target"] = gorpaID,
         ["Target Index"] = gorpaTargetIndex,
@@ -173,7 +162,7 @@ windower.register_event('incoming chunk', function(id, data, modified, injected,
     end
 
     if id == 0x034 or id == 0x032 then
-        if currentlyAugmenting and playerIndex then
+        if currentlyAugmenting then
 
             injectAugmentConfirmationPackets()
 
@@ -184,7 +173,6 @@ windower.register_event('incoming chunk', function(id, data, modified, injected,
             else
                 capeHasBeenPrepared = false
                 currentlyAugmenting = false
-                playerIndex = nil
                 currentCape = nil
                 pathItem = nil
                 tradeReady = false
@@ -239,7 +227,7 @@ function checkDistanceToNPC()
     end
 end
 
-function checkThreadDustDyeSapCount(numberOfAugmentAttempts)
+function checkAugItemCount(numberOfAugmentAttempts)
     if pathItem then
         local pathItemCount = 0
 
@@ -275,7 +263,6 @@ function checkThreadDustDyeSapCount(numberOfAugmentAttempts)
             end
             return false
         else
-            augmentItemIndex = getAugItemIndex()
             return true
         end
     end
@@ -300,7 +287,6 @@ function checkCapeCount()
             windower.add_to_chat(redTextColor, 'You have zero ' .. currentCape.name .. 's in your inventory. Please find the one you intend to augment and move it to your inventory.')
             return false
         elseif capeCount == 1 then
-            capeIndex = getCapeIndex()
             return true
         end
     else
@@ -364,13 +350,16 @@ function startAugmentingCape(numberOfRepeats, firstAttempt)
     inventory = windower.ffxi.get_items(inventoryBagNumber)
     currentlyAugmenting = true
     local augStatus = nil
-    local capeCountsafe = checkCapeCount()
-    if capeHasBeenPrepared and capeCountsafe then
+    local capeIndex
+    local augmentItemIndex
+    if capeHasBeenPrepared and checkCapeCount() and checkAugItemCount(numberOfRepeats) and checkDistanceToNPC() then
         augStatus = checkAugLimits():lower()
+        capeIndex = getItemIndex(currentCape)
+        augmentItemIndex = getItemIndex(pathItem)
     end
 
     if firstAttempt and augStatus then
-        if checkThreadDustDyeSapCount(numberOfRepeats) and checkDistanceToNPC() and augStatus ~= 'maxed' and augStatus ~= 'notmatching' then
+        if augStatus ~= 'maxed' and augStatus ~= 'notmatching' then
             if augStatus:lower() ~= 'empty' then
                 firstTimeAug = false
             else
@@ -387,23 +376,20 @@ function startAugmentingCape(numberOfRepeats, firstAttempt)
             numberOfTimesToAugment = numberOfRepeats
             windower.add_to_chat(blueTextColor, 'Starting to augment your ' .. currentCape.name .. ' ' .. numberOfRepeats .. ' ' .. temp)
 
-            playerIndex = windower.ffxi.get_mob_by_target('me').index
             tradeReady = false
-            buildTrade()
+            buildTrade(capeIndex,augmentItemIndex)
         else
             currentlyAugmenting = false
             tradeReady = false
-            playerIndex = nil
         end
     elseif not firstAttempt and augStatus then
         if augStatus and augStatus ~= 'maxed' then
             tradeReady = false
-            buildTrade()
+            buildTrade(capeIndex,augmentItemIndex)
         else
             capeHasBeenPrepared = false
             currentlyAugmenting = false
             tradeReady = false
-            playerIndex = nil
             pathItem = nil
             currentCape = nil
             windower.add_to_chat(blueTextColor, 'Your cape is currently maxed in that augment path, ending the augment process now.')
@@ -501,7 +487,7 @@ function injectAugmentConfirmationPackets()
     packets.inject(augmentChoicePacket)
 
     local playerUpdatePacket = packets.new('outgoing', 0x016, {
-        ["Target Index"] = playerIndex,
+        ["Target Index"] = windower.ffxi.get_mob_by_target('me').index,
     })
     packets.inject(playerUpdatePacket)
 end
