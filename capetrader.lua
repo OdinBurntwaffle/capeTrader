@@ -137,7 +137,7 @@ end
 
 function getItem(itemName)
     for k, item in pairs(res.items) do
-        if item.name:lower() == itemName:lower() then
+        if item.english:lower() == itemName:lower() then
             return item
         end
     end
@@ -190,7 +190,7 @@ windower.register_event('incoming chunk', function(id, data, modified, injected,
         if tradeReady then
             tradeReady = false
 
-            if not pathItem.name:lower():endswith(' dye') then
+            if not pathItem.english:lower():endswith(' dye') then
                 startAugmentingCape:schedule(dustSapThreadTradeDelay, numberOfTimesToAugment - timesAugmentedCount + 1, false)
             else
                 startAugmentingCape:schedule(dyeTradeDelay, numberOfTimesToAugment - timesAugmentedCount + 1, false)
@@ -242,10 +242,10 @@ function checkAugItemCount(numberOfAugmentAttempts)
         if tonumber(numberOfAugmentAttempts) < 1 then
             windower.add_to_chat(redTextColor, 'Please enter a number of 1 or greater.')
             return false
-        elseif tonumber(numberOfAugmentAttempts) > maxAmountSapAndDye and (pathItem.name:lower():endswith(' dye') or pathItem.name:lower():endswith(' sap')) then
+        elseif tonumber(numberOfAugmentAttempts) > maxAmountSapAndDye and (pathItem.english:lower():endswith(' dye') or pathItem.english:lower():endswith(' sap')) then
             windower.add_to_chat(redTextColor, 'For sap or dye, the max number of times you can augment a cape is ' .. maxAmountSapAndDye .. ' times. You entered: ' .. numberOfAugmentAttempts)
             return false
-        elseif tonumber(numberOfAugmentAttempts) > maxAmountDustAndThread and (pathItem.name:lower():endswith(' dust') or pathItem.name:lower():endswith(' thread')) then
+        elseif tonumber(numberOfAugmentAttempts) > maxAmountDustAndThread and (pathItem.english:lower():endswith(' dust') or pathItem.english:lower():endswith(' thread')) then
             windower.add_to_chat(redTextColor, 'For dust or thread, the max number of times you can augment a cape is ' .. maxAmountDustAndThread .. ' times. You entered: ' .. numberOfAugmentAttempts)
             return false
         elseif tonumber(numberOfAugmentAttempts) > pathItemCount then
@@ -316,7 +316,7 @@ function prepareCapeForAugments(augItemType, jobName, augPath)
 
         if augPath and augItemTypeIsValid and validArguments then
             local isValidPath = false
-            for i, v in pairs(augPaths[pathItem.name:lower()]) do
+            for i, v in pairs(augPaths[pathItem.english:lower()]) do
                 if augPath:lower() == v:lower() then
                     pathIndex = i
                     pathName = augPath
@@ -420,13 +420,13 @@ function checkAugLimits()
 
     local augValue
     if augmentTable then
-        if pathItem.name:lower():endswith(' thread') then
+        if pathItem.english:lower():endswith(' thread') then
             augValue = augmentTable[threadIndex]
-        elseif pathItem.name:lower():endswith(' dust') then
+        elseif pathItem.english:lower():endswith(' dust') then
             augValue = augmentTable[dustIndex]
-        elseif pathItem.name:lower():endswith(' dye') then
+        elseif pathItem.english:lower():endswith(' dye') then
             augValue = augmentTable[dyeIndex]
-        elseif pathItem.name:lower():endswith(' sap') then
+        elseif pathItem.english:lower():endswith(' sap') then
             augValue = augmentTable[sapIndex]
         end
     else
